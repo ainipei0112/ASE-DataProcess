@@ -8,76 +8,39 @@ import datetime
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font,Alignment,Border,Side,PatternFill,numbers
-import pandas as pd
 import mysql.connector
-
-# ----------------------------------- 主程式 -----------------------------------
-
-# 設定資料庫連線資訊
-db_host = '127.0.0.1'
-db_user = 'root'
-db_password = ''
-db_name = 'wb'
-table_name = 'all_2oaoi'
-
-# 資料庫連線
-mydb = mysql.connector.connect(
-    host=db_host,
-    user=db_user,
-    password=db_password,
-    database=db_name
-)
-
-# 建立 Cursor 物件
-mycursor = mydb.cursor()
 
 # ----------------------------------- 函數定義 -----------------------------------
 
-# 設定 Excel 標題格式
-def resetws():
-    wb = openpyxl.Workbook()
-    ws1 = wb.active
-    ws1.title = '工作表1'
-    # 標題欄位
-    column_titles = ['Date', 'Date_1', 'Lot', 'AOI_ID', 'AOI_Scan_Amount', 'AOI_Pass_Amount', 'AOI_Reject_Amount', 
-                    'AOI_Yield', 'AOI_Yield_Die_Corner', 'AI_Pass_Amount', 'AI_Reject_Amount', 'AI_Yield', 
-                    'AI_Fail_Corner_Yield', 'Final_Pass_Amount', 'Final_Reject_Amount', 'Final_Yield', 
-                    'AI_EA_Overkill_Die_Corner', 'AI_EA_Overkill_Die_Surface', 'AI_Image_Overkill_Die_Corner', 
-                    'AI_Image_Overkill_Die_Surface', 'EA_over_kill_Die_Corner', 'EA_over_kill_Die_Surface', 
-                    'Image_Overkill_Die_Corner', 'Image_Overkill_Die_Surface', 'Total_Images', 'Image_Overkill', 
-                    'AI_Fail_EA_Die_Corner', 'AI_Fail_EA_Die_Surface', 'AI_Fail_Image_Die_Corner', 
-                    'AI_Fail_Image_Die_Surface', 'AI_Fail_Total', 'Total_AOI_Die_Corner_Image', 'AI_Pass', 
-                    'AI_Reduction_Die_Corner', 'AI_Reduction_All', 'True_Fail', 'True_Fail_Crack', 'True_Fail_Chipout', 
-                    'True_Fail_Die_Surface', 'True_Fail_Others', 'EA_True_Fail_Crack', 'EA_True_Fail_Chipout', 
-                    'EA_True_Fail_Die_Surface', 'EA_True_Fail_Others', 'EA_True_Fail_Crack_Chipout', 'Device_ID', 
-                    'OP_EA_Die_Corner', 'OP_EA_Die_Surface', 'OP_EA_Others', 'Die_Overkill']
-    for i, title in enumerate(column_titles, start=1):
-        ws1.cell(row=1, column=i, value=title)
-        ws1.column_dimensions[get_column_letter(i)].width = 22
-        fill_color = '95B3D7' if i < 21 else ('FDE9D9' if i < 27 else 'B7DEE8')
-        fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
-        ws1.cell(row=1, column=i).fill = fill
-        side1 = Side(color='000000', style='thin')
-        ws1.cell(row=1, column=i).font = Font(name='Microsoft YaHei', size=12)
-        ws1.cell(row=1, column=i).alignment = Alignment(vertical='center', horizontal='center')
-        ws1.cell(row=1, column=i).border = Border(left=side1, right=side1, top=side1, bottom=side1)
-    ws1.row_dimensions[1].height = 49.5
-    return wb, ws1
-
-# 定義一個函數run，接受昨天日期、今天日期、日期差異、工作簿、工作表、周末等參數
-def run(yesterday, today, diff_day, wb, ws1, weekend=""):
-    # 設置資料讀取路徑
-    settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result\settings\settings.json"
-    main_path=r'\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result'
+# 讀取資料庫設定
+def read_database(settings_path):
     try:
         print("Reading database.")
         with open(settings_path, "r", encoding='utf-8') as r_file:
             databases = json.load(r_file)
         database = [data for data in databases["folder_details"]]
+        return database
     except:
         print("Failed to read database.")
         exit()
 
+# 設定資料庫連線資訊
+def connect_mysql(db_host, db_user, db_password, db_name):
+    try:
+        print("Connecting to MySQL database.")
+        mydb = mysql.connector.connect(
+            host=db_host,
+            user=db_user,
+            password=db_password,
+            database=db_name
+        )
+        return mydb
+    except mysql.connector.Error as error:
+        print(f"Failed to connect to MySQL database: {error}")
+        exit()
+
+# 處理 JSON 資料並寫入資料庫
+def json_to_mysql(database, main_path, db_host, db_user, db_password, db_name, table_name, yesterday, today, weekend=""):
     # 初始化垃圾文件和Excel文件列表
     trash = []
     excel_files = []
@@ -430,145 +393,52 @@ def run(yesterday, today, diff_day, wb, ws1, weekend=""):
     if weekend == "Weekend":
         yesterday = yesterday + "~" + (date_today - datetime.timedelta(1)).strftime("%m%d")
 
-    wb, ws1 = resetws()
-    excel_row = 2
-    print(len(list_data2))
-    if list_data2:
-        print("Creating csv")
-        keys = list_data2[0].keys()
-        directory_name = directory.split('\\')[-1]
-        directory_name = directory_name.split("-")[1:]
-        directory_name = "".join(directory_name)
-        # 建立 Excel 檔案
-        excel_path = r'\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase' + "\\" + yesterday + "_All_(Security C)" + ".xlsx"
-        # 建立 CSV 檔案
-        csv_path = r'\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase' + "\\" + yesterday + "_All_(Security C)" + ".csv"
-        if weekend != "Weekend":
-            # 將資料寫入 CSV 檔案
-            with open(csv_path, 'w', newline='') as output_file:
-                dict_writer = csv.DictWriter(output_file, keys)
-                dict_writer.writeheader()
-                dict_writer.writerows(list_data2)
-        # 將資料寫入 Excel 檔案
-        for list in list_data2:
-            side1 = Side(color='000000', style='thin')
-            cells = ws1['A' + str(excel_row):'AX' + str(excel_row)]
-            for cell in cells:
-                for cel in cell:        
-                    cel.font = Font(name='新細明體', size=12)
-                    cel.alignment = Alignment(vertical='center', horizontal='center') 
-                    cel.border = Border(left=side1, right=side1, top=side1, bottom=side1)
+    # 建立 MySQL 連線
+    mydb = connect_mysql(db_host, db_user, db_password, db_name)
 
-            # 設定數字格式
-            number_formats = {
-                'A': numbers.FORMAT_DATE_DATETIME,
-                'B': 'yyyy/mm/dd',
-                'H': '0.00%',
-                'I': '0.00%',
-                'L': '0.00%',
-                'M': '0.00%',
-                'P': '0.00%',
-                'Q': '0.00%',
-                'R': '0.00%',
-                'S': '0.00%',
-                'T': '0.00%',
-                'AH': '0.00%',
-                'AI': '0.00%'
-            }
-            for column, format in number_formats.items():
-                ws1[column + str(excel_row)].number_format = format
+    # 建立 Cursor 物件
+    mycursor = mydb.cursor()
 
-            # 設定資料
-            data_mapping = {
-                'A': 'Date',
-                'B': 'Date_1',
-                'C': 'Lot',
-                'D': 'AOI_ID',
-                'E': 'AOI_Scan_Amount',
-                'F': 'AOI_Pass_Amount',
-                'G': 'AOI_Reject_Amount',
-                'H': 'AOI_Yield',
-                'I': 'AOI_Yield_Die_Corner',
-                'J': 'AI_Pass_Amount',
-                'K': 'AI_Reject_Amount',
-                'L': 'AI_Yield',
-                'M': 'AI_Fail_Corner_Yield',
-                'N': 'Final_Pass_Amount',
-                'O': 'Final_Reject_Amount',
-                'P': 'Final_Yield',
-                'Q': 'AI_EA_Overkill_Die_Corner',
-                'R': 'AI_EA_Overkill_Die_Surface',
-                'S': 'AI_Image_Overkill_Die_Corner',
-                'T': 'AI_Image_Overkill_Die_Surface',
-                'U': 'EA_over_kill_Die_Corner',
-                'V': 'EA_over_kill_Die_Surface',
-                'W': 'Image_Overkill_Die_Corner',
-                'X': 'Image_Overkill_Die_Surface',
-                'Y': 'Total_Images',
-                'Z': 'Image_Overkill',
-                'AA': 'AI_Fail_EA_Die_Corner',
-                'AB': 'AI_Fail_EA_Die_Surface',
-                'AC': 'AI_Fail_Image_Die_Corner',
-                'AD': 'AI_Fail_Image_Die_Surface',
-                'AE': 'AI_Fail_Total',
-                'AF': 'Total_AOI_Die_Corner_Image',
-                'AG': 'AI_Pass',
-                'AH': 'AI_Reduction_Die_Corner',
-                'AI': 'AI_Reduction_All',
-                'AJ': 'True_Fail',
-                'AK': 'True_Fail_Crack',
-                'AL': 'True_Fail_Chipout',
-                'AM': 'True_Fail_Die_Surface',
-                'AN': 'True_Fail_Others',
-                'AO': 'EA_True_Fail_Crack',
-                'AP': 'EA_True_Fail_Chipout',
-                'AQ': 'EA_True_Fail_Die_Surface',
-                'AR': 'EA_True_Fail_Others',
-                'AS': 'EA_True_Fail_Crack_Chipout',
-                'AT': 'Device_ID',
-                'AU': 'OP_EA_Die_Corner',
-                'AV': 'OP_EA_Die_Surface',
-                'AW': 'OP_EA_Others',
-                'AX': 'Die_Overkill'
-            }
-            for column, key in data_mapping.items():
-                ws1[column + str(excel_row)] = list[key]
-            
-            excel_row += 1
+    # 建立 INSERT 語法
+    sql = "INSERT INTO {} (Date, Date_1, Lot, AOI_ID, AOI_Scan_Amount, AOI_Pass_Amount, AOI_Reject_Amount, AOI_Yield, AOI_Yield_Die_Corner, AI_Pass_Amount, AI_Reject_Amount, AI_Yield, AI_Fail_Corner_Yield, Final_Pass_Amount, Final_Reject_Amount, Final_Yield, AI_EA_Overkill_Die_Corner, AI_EA_Overkill_Die_Surface, AI_Image_Overkill_Die_Corner, AI_Image_Overkill_Die_Surface, EA_over_kill_Die_Corner, EA_over_kill_Die_Surface, Image_Overkill_Die_Corner, Image_Overkill_Die_Surface, Total_Images, Image_Overkill, AI_Fail_EA_Die_Corner, AI_Fail_EA_Die_Surface, AI_Fail_Image_Die_Corner, AI_Fail_Image_Die_Surface, AI_Fail_Total, Total_AOI_Die_Corner_Image, AI_Pass, AI_Reduction_Die_Corner, AI_Reduction_All, True_Fail, True_Fail_Crack, True_Fail_Chipout, True_Fail_Die_Surface, True_Fail_Others, EA_True_Fail_Crack, EA_True_Fail_Chipout, EA_True_Fail_Die_Surface, EA_True_Fail_Others, `EA_True_Fail_Crack_Chipout`, Device_ID, OP_EA_Die_Corner, OP_EA_Die_Surface, OP_EA_Others, Die_Overkill) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table_name)
 
-        # 匯出Excel
-        while True:
-            try:
-                wb.save(excel_path)
-                break
-            except Exception as error:
-                print(error)
-                time.sleep(1)
+    # 初始化總插入筆數
+    total_rows_inserted = 0
 
-        # 讀取 Excel 檔案
-        df = pd.read_excel(excel_path)
+    # 執行 INSERT 語法
+    try:
+        mycursor.executemany(sql, list_data2)
+        mydb.commit()
 
-        # 將 DataFrame 轉換成資料列表
-        data = df.values.tolist()
+        # 取得插入的資料筆數
+        rows_inserted = mycursor.rowcount
+        total_rows_inserted += rows_inserted
+        print(f"Total rows inserted: {total_rows_inserted}!")
+    except mysql.connector.Error as error:
+        print(f"ERROR: {error}")
 
-        # 執行 INSERT 語法
-        try:
-            sql = "INSERT INTO {} (Date, Date_1, Lot, AOI_ID, AOI_Scan_Amount, AOI_Pass_Amount, AOI_Reject_Amount, AOI_Yield, AOI_Yield_Die_Corner, AI_Pass_Amount, AI_Reject_Amount, AI_Yield, AI_Fail_Corner_Yield, Final_Pass_Amount, Final_Reject_Amount, Final_Yield, AI_EA_Overkill_Die_Corner, AI_EA_Overkill_Die_Surface, AI_Image_Overkill_Die_Corner, AI_Image_Overkill_Die_Surface, EA_over_kill_Die_Corner, EA_over_kill_Die_Surface, Image_Overkill_Die_Corner, Image_Overkill_Die_Surface, Total_Images, Image_Overkill, AI_Fail_EA_Die_Corner, AI_Fail_EA_Die_Surface, AI_Fail_Image_Die_Corner, AI_Fail_Image_Die_Surface, AI_Fail_Total, Total_AOI_Die_Corner_Image, AI_Pass, AI_Reduction_Die_Corner, AI_Reduction_All, True_Fail, True_Fail_Crack, True_Fail_Chipout, True_Fail_Die_Surface, True_Fail_Others, EA_True_Fail_Crack, EA_True_Fail_Chipout, EA_True_Fail_Die_Surface, EA_True_Fail_Others, `EA_True_Fail_Crack_Chipout`, Device_ID, OP_EA_Die_Corner, OP_EA_Die_Surface, OP_EA_Others, Die_Overkill) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table_name)
-            mycursor.executemany(sql, data)
-            mydb.commit()
+    # 關閉 Cursor 和連線
+    mycursor.close()
+    mydb.close()
 
-            # 取得插入的資料筆數
-            rows_inserted = mycursor.rowcount
-            print(f"File: {filename} IN {rows_inserted}!")
-        except mysql.connector.Error as error:
-            print(f"File: {filename} ERROR: {error}")
+# ----------------------------------- 主程式 -----------------------------------
 
-    print(directories)
+# 設置資料讀取路徑
+settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
+main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy"
 
-now = datetime.datetime.now()  # 獲取當前時間
-wb, ws1 = resetws()  # 重置工作表
-run((now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), 0, wb, ws1)  # 執行函數
+# 資料庫連線資訊
+db_host = '127.0.0.1'
+db_user = 'root'
+db_password = ''
+db_name = 'wb'
+table_name = 'all_2oaoi'
 
-# 關閉 Cursor 和連線
-mycursor.close()
-mydb.close()
+# 讀取資料庫設定
+database = read_database(settings_path)
+
+# 獲取當前時間
+now = datetime.datetime.now()
+
+# 執行主程式
+json_to_mysql(database, main_path, db_host, db_user, db_password, db_name, table_name, (now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'))  # 執行函數
