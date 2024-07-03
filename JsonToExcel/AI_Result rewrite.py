@@ -499,13 +499,13 @@ def json_to_excel(database, main_path, output_path, yesterday, today, wb, ws1, w
             excel_row += 1
 
         # 匯出Excel
-        while True:
-            try:
-                wb.save(r'\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase' + "\\" + yesterday + "_All_(Security C).xlsx")
-                break
-            except Exception as error:
-                print(error)
-                time.sleep(1)
+        # while True:
+        #     try:
+        #         wb.save(output_path + "\\" + yesterday + "_All_(Security C).xlsx")
+        #         break
+        #     except Exception as error:
+        #         print(error)
+        #         time.sleep(1)
 
     print(directories)
 
