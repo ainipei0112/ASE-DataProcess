@@ -12,8 +12,8 @@ db_name = 'wb'
 # 資料表名稱
 table_name = 'all_2oaoi'
 
-# Excel 檔案所在資料夾路徑
-excel_folder = "D:\ASEKH\K18330\資料處理"
+# CSV 檔案所在資料夾路徑
+csv_folder = "D:\ASEKH\K18330\資料處理"
 
 # 建立 MySQL 連線
 mydb = mysql.connector.connect(
@@ -22,6 +22,12 @@ mydb = mysql.connector.connect(
     password=db_password,
     database=db_name
 )
+
+# 驗證連線
+if mydb.is_connected():
+    print("Database connection successful")
+else:
+    print("Database connection failed")
 
 # 建立 Cursor 物件
 mycursor = mydb.cursor()
@@ -33,14 +39,17 @@ sql = "INSERT INTO {} (Date, Date_1, Lot, AOI_ID, AOI_Scan_Amount, AOI_Pass_Amou
 total_rows_inserted = 0
 
 # 遍歷資料夾中的檔案
-for filename in os.listdir(excel_folder):
+for filename in os.listdir(csv_folder):
     # 使用正則表達式檢查檔案名稱是否符合命名規則
-    if re.match(r'^\d{2}\d{2}_All_\(Security C\).xlsx$', filename):
+    if re.match(r'^\d{2}\d{2}_All_\(Security C\).csv$', filename):
         # 構建完整檔案路徑
-        excel_file = os.path.join(excel_folder, filename)
+        csv_file = os.path.join(csv_folder, filename)
 
-        # 讀取 Excel 檔案
-        df = pd.read_excel(excel_file)
+        # 讀取 CSV 檔案
+        df = pd.read_csv(csv_file)
+
+        # 檢查資料類型
+        print(df.dtypes)
 
         # 將 DataFrame 轉換成資料列表
         data = df.values.tolist()
