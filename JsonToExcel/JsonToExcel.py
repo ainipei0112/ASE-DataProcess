@@ -5,7 +5,7 @@ import time
 import numpy as np
 import shutil
 import datetime
-import openpyxl
+from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill, numbers
 
@@ -25,7 +25,7 @@ def read_database(settings_path):
 
 #設定Excel標題格式
 def reset_ws():
-    wb = openpyxl.Workbook()
+    wb = Workbook()
     ws1 = wb.active
     ws1.title = '工作表1'
     
@@ -524,7 +524,7 @@ def process_data(database, main_path, output_path, yesterday, today, wb, ws1, we
 # ----------------------------------- 主程式 -----------------------------------
 
 # 切換正式或測試環境的資料讀取路徑
-env = "dev"  # 環境變數
+env = "prod"  # 環境變數
 
 if env == "dev":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
@@ -547,4 +547,4 @@ now = datetime.datetime.now()
 # 處理 JSON 資料並寫入 Excel
 wb, ws1 = reset_ws()
 # process_data(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1)  # 執行函數
-process_data(database, main_path, output_path,"0701","0702", wb, ws1, output_type="both")  # 執行函數
+process_data(database, main_path, output_path,"0701","0704", wb, ws1, output_type="both")  # 執行函數
