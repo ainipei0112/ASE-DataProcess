@@ -7,7 +7,7 @@ import shutil
 import datetime
 import openpyxl
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Font,Alignment,Border,Side,PatternFill,numbers
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill, numbers
 
 # ----------------------------------- 函數定義 -----------------------------------
 
@@ -506,25 +506,32 @@ def process_data(database, main_path, output_path, yesterday, today, wb, ws1, we
             excel_row += 1
 
         # 匯出Excel
-        # while True:
-        #     try:
-        #         wb.save(output_path + "\\" + yesterday + "_All_(Security C).xlsx")
-        #         break
-        #     except Exception as error:
-        #         print(error)
-        #         time.sleep(1)
+        while True:
+            try:
+                wb.save(output_path + "\\" + yesterday + "_All_(Security C).xlsx")
+                break
+            except Exception as error:
+                print(error)
+                time.sleep(1)
 
     print(directories)
 
 # ----------------------------------- 主程式 -----------------------------------
 
-# 設置資料讀取路徑
-settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
-main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy"
-output_path = r"D:\ASEKH\K18330\資料處理"
-# settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result\settings\settings.json"
-# main_path=r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result"
-# output_path = r"\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase"
+# 切換正式或測試環境的資料讀取路徑
+env = "dev"  # 環境變數
+
+if env == "dev":
+    settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
+    main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy"
+    output_path = r"D:\ASEKH\K18330\資料處理"
+elif env == "prod":
+    settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result\settings\settings.json"
+    main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result"
+    output_path = r"\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase"
+else:
+    print("請設定正確的環境變數：dev 或 prod")
+    exit()
 
 # 讀取資料庫設定
 database = read_database(settings_path)
