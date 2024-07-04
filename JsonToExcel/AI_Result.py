@@ -399,7 +399,7 @@ def json_to_excel(database, main_path, output_path, yesterday, today, wb, ws1, w
 
     wb, ws1 = resetws()
     excel_row = 2
-    print(len(list_data2))
+
     if list_data2:
         print("Creating csv")
         keys = list_data2[0].keys()
@@ -527,5 +527,5 @@ now = datetime.datetime.now()
 
 # 處理 JSON 資料並寫入 Excel
 wb, ws1 = resetws()
-# json_to_excel(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1)  # 執行函數
-json_to_excel(database, main_path, output_path,"0701","0702", wb, ws1)  # 執行函數
+json_to_excel(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1)  # 執行函數
+# json_to_excel(database, main_path, output_path,"0702","0703", wb, ws1)  # 執行函數

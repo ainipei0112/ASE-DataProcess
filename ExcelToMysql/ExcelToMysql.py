@@ -13,7 +13,7 @@ db_name = 'wb'
 table_name = 'all_2oaoi'
 
 # Excel 檔案所在資料夾路徑
-excel_folder = "C:\\Users\\K18330\\Desktop\\資料處理"
+excel_folder = "D:\ASEKH\K18330\資料處理"
 
 # 建立 MySQL 連線
 mydb = mysql.connector.connect(
