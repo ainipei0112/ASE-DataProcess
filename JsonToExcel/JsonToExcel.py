@@ -47,7 +47,7 @@ def reset_ws():
     return wb, ws1
 
 # 處理 JSON 資料並寫入 Excel
-def process_data(database, main_path, output_path, yesterday, today, wb, ws1, weekend=""):
+def process_data(database, main_path, output_path, yesterday, today, wb, ws1, weekend="", output_type="both"):
     # 初始化垃圾文件和Excel文件列表
     trash = []
     excel_files = []
@@ -414,105 +414,110 @@ def process_data(database, main_path, output_path, yesterday, today, wb, ws1, we
         directory_name = directory_name.split("-")[1:]
         directory_name = "".join(directory_name)
         csv_path = output_path + "\\" + yesterday + "_All_(Security C)" + ".csv"
-        if weekend != "Weekend":
-            with open(csv_path, 'w', newline='') as output_file:
-                dict_writer = csv.DictWriter(output_file, keys)
-                dict_writer.writeheader()
-                dict_writer.writerows(list_data2)
-        for list in list_data2:
-            side1 = Side(color='000000', style='thin')
-            cells = ws1['A' + str(excel_row):'AX' + str(excel_row)]
-            for cell in cells:
-                for cel in cell:        
-                    cel.font = Font(name='新細明體', size=12)
-                    cel.alignment = Alignment(vertical='center', horizontal='center') 
-                    cel.border = Border(left=side1, right=side1, top=side1, bottom=side1)
 
-            # 設定數字格式
-            number_formats = {
-                'A': numbers.FORMAT_DATE_DATETIME,
-                'B': 'yyyy/mm/dd',
-                'H': '0.00%',
-                'I': '0.00%',
-                'L': '0.00%',
-                'M': '0.00%',
-                'P': '0.00%',
-                'Q': '0.00%',
-                'R': '0.00%',
-                'S': '0.00%',
-                'T': '0.00%',
-                'AH': '0.00%',
-                'AI': '0.00%'
-            }
-            for column, format in number_formats.items():
-                ws1[column + str(excel_row)].number_format = format
+        # 根據 output_type 輸出 CSV 或 Excel 或兩個都輸出
+        if output_type == "csv" or output_type == "both":
+            if weekend != "Weekend":
+                with open(csv_path, 'w', newline='') as output_file:
+                    dict_writer = csv.DictWriter(output_file, keys)
+                    dict_writer.writeheader()
+                    dict_writer.writerows(list_data2)
 
-            # 設定資料
-            data_mapping = {
-                'A': 'Date',
-                'B': 'Date_1',
-                'C': 'Lot',
-                'D': 'AOI_ID',
-                'E': 'AOI_Scan_Amount',
-                'F': 'AOI_Pass_Amount',
-                'G': 'AOI_Reject_Amount',
-                'H': 'AOI_Yield',
-                'I': 'AOI_Yield_Die_Corner',
-                'J': 'AI_Pass_Amount',
-                'K': 'AI_Reject_Amount',
-                'L': 'AI_Yield',
-                'M': 'AI_Fail_Corner_Yield',
-                'N': 'Final_Pass_Amount',
-                'O': 'Final_Reject_Amount',
-                'P': 'Final_Yield',
-                'Q': 'AI_EA_Overkill_Die_Corner',
-                'R': 'AI_EA_Overkill_Die_Surface',
-                'S': 'AI_Image_Overkill_Die_Corner',
-                'T': 'AI_Image_Overkill_Die_Surface',
-                'U': 'EA_over_kill_Die_Corner',
-                'V': 'EA_over_kill_Die_Surface',
-                'W': 'Image_Overkill_Die_Corner',
-                'X': 'Image_Overkill_Die_Surface',
-                'Y': 'Total_Images',
-                'Z': 'Image_Overkill',
-                'AA': 'AI_Fail_EA_Die_Corner',
-                'AB': 'AI_Fail_EA_Die_Surface',
-                'AC': 'AI_Fail_Image_Die_Corner',
-                'AD': 'AI_Fail_Image_Die_Surface',
-                'AE': 'AI_Fail_Total',
-                'AF': 'Total_AOI_Die_Corner_Image',
-                'AG': 'AI_Pass',
-                'AH': 'AI_Reduction_Die_Corner',
-                'AI': 'AI_Reduction_All',
-                'AJ': 'True_Fail',
-                'AK': 'True_Fail_Crack',
-                'AL': 'True_Fail_Chipout',
-                'AM': 'True_Fail_Die_Surface',
-                'AN': 'True_Fail_Others',
-                'AO': 'EA_True_Fail_Crack',
-                'AP': 'EA_True_Fail_Chipout',
-                'AQ': 'EA_True_Fail_Die_Surface',
-                'AR': 'EA_True_Fail_Others',
-                'AS': 'EA_True_Fail_Crack_Chipout',
-                'AT': 'Device_ID',
-                'AU': 'OP_EA_Die_Corner',
-                'AV': 'OP_EA_Die_Surface',
-                'AW': 'OP_EA_Others',
-                'AX': 'Die_Overkill'
-            }
-            for column, key in data_mapping.items():
-                ws1[column + str(excel_row)] = list[key]
+        if output_type == "excel" or output_type == "both":
+            for list in list_data2:
+                side1 = Side(color='000000', style='thin')
+                cells = ws1['A' + str(excel_row):'AX' + str(excel_row)]
+                for cell in cells:
+                    for cel in cell:        
+                        cel.font = Font(name='新細明體', size=12)
+                        cel.alignment = Alignment(vertical='center', horizontal='center') 
+                        cel.border = Border(left=side1, right=side1, top=side1, bottom=side1)
+
+                # 設定數字格式
+                number_formats = {
+                    'A': numbers.FORMAT_DATE_DATETIME,
+                    'B': 'yyyy/mm/dd',
+                    'H': '0.00%',
+                    'I': '0.00%',
+                    'L': '0.00%',
+                    'M': '0.00%',
+                    'P': '0.00%',
+                    'Q': '0.00%',
+                    'R': '0.00%',
+                    'S': '0.00%',
+                    'T': '0.00%',
+                    'AH': '0.00%',
+                    'AI': '0.00%'
+                }
+                for column, format in number_formats.items():
+                    ws1[column + str(excel_row)].number_format = format
+
+                # 設定資料
+                data_mapping = {
+                    'A': 'Date',
+                    'B': 'Date_1',
+                    'C': 'Lot',
+                    'D': 'AOI_ID',
+                    'E': 'AOI_Scan_Amount',
+                    'F': 'AOI_Pass_Amount',
+                    'G': 'AOI_Reject_Amount',
+                    'H': 'AOI_Yield',
+                    'I': 'AOI_Yield_Die_Corner',
+                    'J': 'AI_Pass_Amount',
+                    'K': 'AI_Reject_Amount',
+                    'L': 'AI_Yield',
+                    'M': 'AI_Fail_Corner_Yield',
+                    'N': 'Final_Pass_Amount',
+                    'O': 'Final_Reject_Amount',
+                    'P': 'Final_Yield',
+                    'Q': 'AI_EA_Overkill_Die_Corner',
+                    'R': 'AI_EA_Overkill_Die_Surface',
+                    'S': 'AI_Image_Overkill_Die_Corner',
+                    'T': 'AI_Image_Overkill_Die_Surface',
+                    'U': 'EA_over_kill_Die_Corner',
+                    'V': 'EA_over_kill_Die_Surface',
+                    'W': 'Image_Overkill_Die_Corner',
+                    'X': 'Image_Overkill_Die_Surface',
+                    'Y': 'Total_Images',
+                    'Z': 'Image_Overkill',
+                    'AA': 'AI_Fail_EA_Die_Corner',
+                    'AB': 'AI_Fail_EA_Die_Surface',
+                    'AC': 'AI_Fail_Image_Die_Corner',
+                    'AD': 'AI_Fail_Image_Die_Surface',
+                    'AE': 'AI_Fail_Total',
+                    'AF': 'Total_AOI_Die_Corner_Image',
+                    'AG': 'AI_Pass',
+                    'AH': 'AI_Reduction_Die_Corner',
+                    'AI': 'AI_Reduction_All',
+                    'AJ': 'True_Fail',
+                    'AK': 'True_Fail_Crack',
+                    'AL': 'True_Fail_Chipout',
+                    'AM': 'True_Fail_Die_Surface',
+                    'AN': 'True_Fail_Others',
+                    'AO': 'EA_True_Fail_Crack',
+                    'AP': 'EA_True_Fail_Chipout',
+                    'AQ': 'EA_True_Fail_Die_Surface',
+                    'AR': 'EA_True_Fail_Others',
+                    'AS': 'EA_True_Fail_Crack_Chipout',
+                    'AT': 'Device_ID',
+                    'AU': 'OP_EA_Die_Corner',
+                    'AV': 'OP_EA_Die_Surface',
+                    'AW': 'OP_EA_Others',
+                    'AX': 'Die_Overkill'
+                }
+                for column, key in data_mapping.items():
+                    ws1[column + str(excel_row)] = list[key]
             
-            excel_row += 1
+                excel_row += 1
 
-        # 匯出Excel
-        while True:
-            try:
-                wb.save(output_path + "\\" + yesterday + "_All_(Security C).xlsx")
-                break
-            except Exception as error:
-                print(error)
-                time.sleep(1)
+            # 匯出Excel
+            while True:
+                try:
+                    wb.save(output_path + "\\" + yesterday + "_All_(Security C).xlsx")
+                    break
+                except Exception as error:
+                    print(error)
+                    time.sleep(1)
 
     print(directories)
 
@@ -542,4 +547,4 @@ now = datetime.datetime.now()
 # 處理 JSON 資料並寫入 Excel
 wb, ws1 = reset_ws()
 # process_data(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1)  # 執行函數
-process_data(database, main_path, output_path,"0701","0702", wb, ws1)  # 執行函數
+process_data(database, main_path, output_path,"0701","0702", wb, ws1, output_type="both")  # 執行函數
