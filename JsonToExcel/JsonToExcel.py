@@ -524,7 +524,7 @@ def process_data(database, main_path, output_path, yesterday, today, wb, ws1, we
 # ----------------------------------- 主程式 -----------------------------------
 
 # 切換正式或測試環境的資料讀取路徑
-env = "prod"  # 環境變數
+env = "dev"  # 環境變數
 
 if env == "dev":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
@@ -543,8 +543,8 @@ database = read_database(settings_path)
 
 # 獲取當前時間
 now = datetime.datetime.now()
-
-# 處理 JSON 資料並寫入 Excel
 wb, ws1 = reset_ws()
-# process_data(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1)  # 執行函數
-process_data(database, main_path, output_path,"0701","0704", wb, ws1, output_type="both")  # 執行函數
+
+# 執行函數
+# process_data(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
+process_data(database, main_path, output_path,"0701","0704", wb, ws1, output_type="csv")
