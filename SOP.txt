@@ -1,12 +1,11 @@
 https://www.johntool.com/batch-open-files-automatically/
 設定每日自動排程執行批次檔
 
-
-讓server能自動寫入資料庫
+◎讓server能自動寫入資料庫
 
 整合匯出excel和用excel寫入資料庫程式
 
-
+每天8點執行自動抓資料寫入資料庫
 
 
 
@@ -16,6 +15,5 @@ pip install --trusted-host pypi.tuna.tsinghua.edu.cn --trusted-host mirrors.aliy
 以上為安裝mysql-connector
 
 可能的原因：
-
-使用 --trusted-host 选项成功： pip 现在直接信任了 PyPI 镜像库，不再需要验证证书，从而顺利下载了套件。
-使用其他 PyPI 镜像库成功： 你选择的其他镜像库的证书可能是有效的，或者没有使用自签證書，因此 pip 可以顺利验证证书并下载套件。
+使用 --trusted-host 選項成功： pip 現在直接信任了 PyPI 鏡像庫，不再需要驗證證書，從而順利下載了套件。
+使用其他 PyPI 鏡像庫成功： 你選擇的其他鏡像庫的證書可能是有效的，或者沒有使用自簽證書，因此 pip 可以順利驗證證書並下載套件。

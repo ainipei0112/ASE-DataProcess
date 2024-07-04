@@ -17,34 +17,37 @@ def read_database(settings_path):
         print("Reading database.")
         with open(settings_path, "r", encoding='utf-8') as r_file:
             databases = json.load(r_file)
-        database = [data for data in databases["folder_details"]]
+        database = databases["folder_details"]
         return database
-    except:
-        print("Failed to read database.")
+    except Exception as e:
+        print(f"Failed to read database: {e}")
         exit()
 
 #設定Excel標題格式
-def resetws():
+def reset_ws():
     wb = openpyxl.Workbook()
     ws1 = wb.active
     ws1.title = '工作表1'
+    
     # 標題欄位
     column_titles = ['Date', 'Date_1', 'Lot', 'AOI_ID', 'AOI_Scan_Amount', 'AOI_Pass_Amount', 'AOI_Reject_Amount', 'AOI_Yield', 'AOI_Yield_Die_Corner', 'AI_Pass_Amount', 'AI_Reject_Amount', 'AI_Yield', 'AI_Fail_Corner_Yield', 'Final_Pass_Amount', 'Final_Reject_Amount', 'Final_Yield', 'AI_EA_Overkill_Die_Corner', 'AI_EA_Overkill_Die_Surface', 'AI_Image_Overkill_Die_Corner', 'AI_Image_Overkill_Die_Surface', 'EA_over_kill_Die_Corner', 'EA_over_kill_Die_Surface', 'Image_Overkill_Die_Corner', 'Image_Overkill_Die_Surface', 'Total_Images', 'Image_Overkill', 'AI_Fail_EA_Die_Corner', 'AI_Fail_EA_Die_Surface', 'AI_Fail_Image_Die_Corner', 'AI_Fail_Image_Die_Surface', 'AI_Fail_Total', 'Total_AOI_Die_Corner_Image', 'AI_Pass', 'AI_Reduction_Die_Corner', 'AI_Reduction_All', 'True_Fail', 'True_Fail_Crack', 'True_Fail_Chipout', 'True_Fail_Die_Surface', 'True_Fail_Others', 'EA_True_Fail_Crack', 'EA_True_Fail_Chipout', 'EA_True_Fail_Die_Surface', 'EA_True_Fail_Others', 'EA_True_Fail_Crack_Chipout', 'Device_ID', 'OP_EA_Die_Corner', 'OP_EA_Die_Surface', 'OP_EA_Others', 'Die_Overkill']
+    
     for i, title in enumerate(column_titles, start=1):
-        ws1.cell(row=1, column=i, value=title)
+        cell = ws1.cell(row=1, column=i, value=title)
         ws1.column_dimensions[get_column_letter(i)].width = 22
         fill_color = '95B3D7' if i < 21 else ('FDE9D9' if i < 27 else 'B7DEE8')
         fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
-        ws1.cell(row=1, column=i).fill = fill
+        cell.fill = fill
         side1 = Side(color='000000', style='thin')
-        ws1.cell(row=1, column=i).font = Font(name='Microsoft YaHei', size=12)
-        ws1.cell(row=1, column=i).alignment = Alignment(vertical='center', horizontal='center')
-        ws1.cell(row=1, column=i).border = Border(left=side1, right=side1, top=side1, bottom=side1)
+        cell.font = Font(name='Microsoft YaHei', size=12)
+        cell.alignment = Alignment(vertical='center', horizontal='center')
+        cell.border = Border(left=side1, right=side1, top=side1, bottom=side1)
+    
     ws1.row_dimensions[1].height = 49.5
     return wb, ws1
 
 # 處理 JSON 資料並寫入 Excel
-def json_to_excel(database, main_path, output_path, yesterday, today, wb, ws1, weekend=""):
+def process_data(database, main_path, output_path, yesterday, today, wb, ws1, weekend=""):
     # 初始化垃圾文件和Excel文件列表
     trash = []
     excel_files = []
@@ -61,24 +64,28 @@ def json_to_excel(database, main_path, output_path, yesterday, today, wb, ws1, w
     today1 = datetime.datetime.strptime(today_str, '%Y-%m-%d %H:%M:%S')
     
     # 主路徑下所有的文件夾及文件
-    directories = [f.path for f in os.scandir(main_path)]
+    directories = [f.path for f in os.scandir(main_path) if f.is_dir()]
     for date_directory in directories:
         if os.path.isfile(date_directory):
             filename = date_directory.split("\\")[-1]
             if date_directory.endswith("csv"):
                 excel_files.append(filename.split("_")[-2])
             trash.append(date_directory)
-    
-    for date_directory in directories:
-        if os.path.isdir(date_directory):
-            directory_name = date_directory.split("\\")[-1]
-            try:
-                date_folder = datetime.datetime.strptime(directory_name, "%Y-%m-%d")
-                if date_folder < date_yesterday or date_folder > date_today:
-                    trash.append(date_directory)
-                    continue
-            except:
-                pass
+
+    directories = [d for d in directories if d not in trash]
+
+    for directory in directories:
+        lot_names = [f.path for f in os.scandir(directory) if f.is_dir()]
+
+        for lot_name in lot_names:
+            Json_files = [f.path for f in os.scandir(lot_name) if f.is_file() and f.path.endswith('.json')]
+
+            for Json_file in Json_files:
+                try:
+                    with open(Json_file) as json_file:
+                        data = json.load(json_file)
+                except:
+                    pass
 
     # 清理垃圾文件
     directories = [d for d in directories if d not in trash]  # 使用列表推導式替換刪除迴圈
@@ -397,7 +404,7 @@ def json_to_excel(database, main_path, output_path, yesterday, today, wb, ws1, w
     if weekend == "Weekend":
         yesterday = yesterday + "~" + (date_today - datetime.timedelta(1)).strftime("%m%d")
 
-    wb, ws1 = resetws()
+    wb, ws1 = reset_ws()
     excel_row = 2
 
     if list_data2:
@@ -526,6 +533,6 @@ database = read_database(settings_path)
 now = datetime.datetime.now()
 
 # 處理 JSON 資料並寫入 Excel
-wb, ws1 = resetws()
-json_to_excel(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1)  # 執行函數
-# json_to_excel(database, main_path, output_path,"0702","0703", wb, ws1)  # 執行函數
+wb, ws1 = reset_ws()
+# process_data(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1)  # 執行函數
+process_data(database, main_path, output_path,"0701","0702", wb, ws1)  # 執行函數
