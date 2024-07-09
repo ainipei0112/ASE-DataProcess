@@ -1,10 +1,13 @@
+import re
 import os
 import csv
 import json
 import time
-import numpy as np
 import shutil
 import datetime
+import numpy as np
+import pandas as pd
+import mysql.connector
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill, numbers
@@ -45,9 +48,9 @@ def reset_ws():
     
     ws1.row_dimensions[1].height = 49.5
     return wb, ws1
-    
-# 定義一個函數process_data，接受昨天日期、今天日期、日期差異、工作簿、工作表、周末等參數
-def process_data(database, main_path, output_path, start_date, end_date, wb, ws1, weekend="", output_type="both"):
+
+# 處理 JSON 資料並寫入 Excel
+def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, weekend="", output_type="both"):
     # 初始化垃圾文件和Excel文件列表
     trash = []
     excel_files = []
@@ -56,12 +59,12 @@ def process_data(database, main_path, output_path, start_date, end_date, wb, ws1
     list_data_t = []
 
     # 日期格式轉換
-    date_start = datetime.datetime.strptime(str(datetime.datetime.now().year) + start_date, "%Y%m%d")
-    date_end = datetime.datetime.strptime(str(datetime.datetime.now().year) + end_date, "%Y%m%d")
-    start_str = datetime.datetime.strftime(date_start, '%Y-%m-%d 07:30:00')  # 只抓取當天七點半後的資料
-    end_str = datetime.datetime.strftime(date_end, '%Y-%m-%d 07:30:00')
-    start1 = datetime.datetime.strptime(start_str, '%Y-%m-%d %H:%M:%S')
-    end1 = datetime.datetime.strptime(end_str, '%Y-%m-%d %H:%M:%S')
+    date_yesterday = datetime.datetime.strptime(str(datetime.datetime.now().year) + yesterday, "%Y%m%d")
+    date_today = datetime.datetime.strptime(str(datetime.datetime.now().year) + today, "%Y%m%d")
+    yesterday_str = datetime.datetime.strftime(date_yesterday, '%Y-%m-%d 07:30:00')  # 只抓取當天七點半後的資料
+    today_str = datetime.datetime.strftime(date_today, '%Y-%m-%d 07:30:00')
+    yesterday1 = datetime.datetime.strptime(yesterday_str, '%Y-%m-%d %H:%M:%S')
+    today1 = datetime.datetime.strptime(today_str, '%Y-%m-%d %H:%M:%S')
     
     # 主路徑下所有的文件夾及文件
     directories = [f.path for f in os.scandir(main_path)]
@@ -77,7 +80,7 @@ def process_data(database, main_path, output_path, start_date, end_date, wb, ws1
             directory_name = date_directory.split("\\")[-1]
             try:
                 date_folder = datetime.datetime.strptime(directory_name, "%Y-%m-%d")
-                if date_folder < date_start or date_folder > date_end:
+                if date_folder < date_yesterday or date_folder > date_today:
                     trash.append(date_directory)
                     continue
             except:
@@ -390,7 +393,7 @@ def process_data(database, main_path, output_path, start_date, end_date, wb, ws1
     
     for dic in list_data:
         now1 = datetime.datetime.strptime(dic["Date"], '%Y-%m-%d %H:%M:%S')
-        if start1 <= now1 <= end1:
+        if yesterday1 <= now1 <= today1:
             list_data_t.append(dic)
     
     list_data_t = sorted(list_data_t, key=lambda x: x["Date"])
@@ -398,11 +401,11 @@ def process_data(database, main_path, output_path, start_date, end_date, wb, ws1
         list_data2.append(dic)
 
     if weekend == "Weekend":
-        yesterday = yesterday + "~" + (date_end - datetime.timedelta(1)).strftime("%m%d")
+        yesterday = yesterday + "~" + (date_today - datetime.timedelta(1)).strftime("%m%d")
 
     wb, ws1 = reset_ws()
     excel_row = 2
-    print(len(list_data2))
+
     if list_data2:
         print("Creating csv")
         keys = list_data2[0].keys()
@@ -503,7 +506,7 @@ def process_data(database, main_path, output_path, start_date, end_date, wb, ws1
                 }
                 for column, key in data_mapping.items():
                     ws1[column + str(excel_row)] = list[key]
-                
+            
                 excel_row += 1
 
             # 匯出Excel
@@ -517,10 +520,96 @@ def process_data(database, main_path, output_path, start_date, end_date, wb, ws1
 
     print(directories)
 
-# ----------------------------------- 主程式 -----------------------------------
+# 將 CSV 資料寫入 MySQL 資料庫
+def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name):
+    """
+    將 CSV 檔案匯入 MySQL 資料庫。
+
+    Args:
+        csv_folder (str): CSV 檔案所在資料夾路徑。
+        target_folder (str): 目標資料夾路徑。
+        db_host (str): MySQL 資料庫主機地址。
+        db_user (str): MySQL 資料庫使用者名稱。
+        db_password (str): MySQL 資料庫密碼。
+        db_name (str): MySQL 資料庫名稱。
+        table_name (str): MySQL 資料表名稱。
+    """
+
+    # 建立 MySQL 連線
+    mydb = mysql.connector.connect(
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_name
+    )
+
+    # 驗證連線
+    if mydb.is_connected():
+        print("Database connection successful")
+    else:
+        print("Database connection failed")
+
+    # 建立 Cursor 物件
+    mycursor = mydb.cursor()
+
+    # 建立 INSERT 語法
+    sql = "INSERT INTO {} (Date, Date_1, Lot, AOI_ID, AOI_Scan_Amount, AOI_Pass_Amount, AOI_Reject_Amount, AOI_Yield, AOI_Yield_Die_Corner, AI_Pass_Amount, AI_Reject_Amount, AI_Yield, AI_Fail_Corner_Yield, Final_Pass_Amount, Final_Reject_Amount, Final_Yield, AI_EA_Overkill_Die_Corner, AI_EA_Overkill_Die_Surface, AI_Image_Overkill_Die_Corner, AI_Image_Overkill_Die_Surface, EA_over_kill_Die_Corner, EA_over_kill_Die_Surface, Image_Overkill_Die_Corner, Image_Overkill_Die_Surface, Total_Images, Image_Overkill, AI_Fail_EA_Die_Corner, AI_Fail_EA_Die_Surface, AI_Fail_Image_Die_Corner, AI_Fail_Image_Die_Surface, AI_Fail_Total, Total_AOI_Die_Corner_Image, AI_Pass, AI_Reduction_Die_Corner, AI_Reduction_All, True_Fail, True_Fail_Crack, True_Fail_Chipout, True_Fail_Die_Surface, True_Fail_Others, EA_True_Fail_Crack, EA_True_Fail_Chipout, EA_True_Fail_Die_Surface, EA_True_Fail_Others, `EA_True_Fail_Crack_Chipout`, Device_ID, OP_EA_Die_Corner, OP_EA_Die_Surface, OP_EA_Others, Die_Overkill) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table_name)
+
+    # 初始化總插入筆數
+    total_rows_inserted = 0
+
+    # 遍歷資料夾中的檔案
+    for filename in os.listdir(csv_folder):
+        # 使用正則表達式檢查檔案名稱是否符合命名規則
+        if re.match(r'^\d{2}\d{2}_All_\(Security C\).csv$', filename):
+            # 構建完整檔案路徑
+            csv_file = os.path.join(csv_folder, filename)
+
+            # 讀取 CSV 檔案
+            df = pd.read_csv(csv_file)
+
+            # 將 DataFrame 轉換成資料列表
+            data = df.values.tolist()
+
+            # 執行 INSERT 語法
+            try:
+                mycursor.executemany(sql, data)
+                mydb.commit()
+
+                # 取得插入的資料筆數
+                rows_inserted = mycursor.rowcount
+                total_rows_inserted += rows_inserted
+                print(f"File: {filename} IN {rows_inserted}!")
+
+                # 取得檔案月份
+                month = filename[:2]
+
+                # 取得當年的年份
+                current_year = datetime.datetime.now().year
+
+                # 構建目標資料夾路徑
+                month_folder = os.path.join(target_folder, str(current_year), month)
+
+                # 檢查資料夾是否存在，不存在則建立資料夾
+                if not os.path.exists(month_folder):
+                    os.makedirs(month_folder)
+
+                # 移動檔案
+                shutil.move(csv_file, month_folder)
+            except mysql.connector.Error as error:
+                print(f"File: {filename} ERROR: {error}")
+
+    # 輸出總共插入的資料筆數
+    print(f"\nTotal rows inserted: {total_rows_inserted}")
+
+    # 關閉 Cursor 和連線
+    mycursor.close()
+    mydb.close()
+
+# ----------------------------------- 參數設定 -----------------------------------
 
 # 切換正式或測試環境的資料讀取路徑
-env = "dev"  # 環境變數
+env = "prod"  # 環境變數
 
 if env == "dev":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
@@ -537,18 +626,40 @@ else:
 # 讀取資料庫設定
 database = read_database(settings_path)
 
-# 獲取當前時間
-now = datetime.datetime.now()
+# CSV 檔案所在資料夾路徑
+csv_folder = "D:\ASEKH\K18330\資料處理"
+
+# 目標資料夾路徑
+target_folder = "D:\ASEKH\K18330\資料處理\All Data"
+
+# MySQL 連線資訊
+db_host = '127.0.0.1'
+db_user = 'root'
+db_password = ''
+db_name = 'wb'
+
+# 資料表名稱
+table_name = 'all_2oaoi'
+
+# 初始化 Excel
 wb, ws1 = reset_ws()
 
-# 執行函數
-# process_data(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
+# 獲取當前時間
+now = datetime.datetime.now()
+
+# ----------------------------------- 主程式 -----------------------------------
+
+
+# 當天資料
+# JsonToExcel(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
+# CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # start_day ~ end_day
-start_day = "0620"
-end_day = "0622"
-for date in range(int(start_day), int(end_day)):
+start_day = "0601"
+end_day = "0607"
+for date in range(int(start_day), int(end_day) + 1):
     start_date = str(date).zfill(4)
-    end_date = str(date+2).zfill(4)
+    end_date = str(date + 1).zfill(4)
     print(start_date)
-    process_data(database, main_path, output_path, start_date, end_date, wb, ws1, output_type="csv")
+    JsonToExcel(database, main_path, output_path, start_date, end_date, wb, ws1, output_type="csv")
+    CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
