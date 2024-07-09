@@ -14,8 +14,8 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill, numbers
 
 # ----------------------------------- 函數定義 -----------------------------------
 
-# 讀取資料庫設定
-def read_database(settings_path):
+# Json 資料讀取設定
+def read_Jsonfile(settings_path):
     try:
         print("Reading database.")
         with open(settings_path, "r", encoding='utf-8') as r_file:
@@ -609,28 +609,21 @@ def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name
 # ----------------------------------- 參數設定 -----------------------------------
 
 # 切換正式或測試環境的資料讀取路徑
-env = "prod"  # 環境變數
+env = "dev"  # 環境變數
 
 if env == "dev":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
     main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy"
-    output_path = r"D:\ASEKH\K18330\資料處理"
+    csv_folder = "D:\ASEKH\K18330\資料處理"
+    target_folder = "D:\ASEKH\K18330\資料處理\All Data"
 elif env == "prod":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result\settings\settings.json"
     main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result"
-    output_path = r"\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase"
+    csv_folder = "\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase"
+    target_folder = "\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase\All Data"
 else:
     print("請設定正確的環境變數：dev 或 prod")
     exit()
-
-# 讀取資料庫設定
-database = read_database(settings_path)
-
-# CSV 檔案所在資料夾路徑
-csv_folder = "D:\ASEKH\K18330\資料處理"
-
-# 目標資料夾路徑
-target_folder = "D:\ASEKH\K18330\資料處理\All Data"
 
 # MySQL 連線資訊
 db_host = '127.0.0.1'
@@ -641,25 +634,23 @@ db_name = 'wb'
 # 資料表名稱
 table_name = 'all_2oaoi'
 
-# 初始化 Excel
+# 初始化
 wb, ws1 = reset_ws()
-
-# 獲取當前時間
+database = read_Jsonfile(settings_path)
 now = datetime.datetime.now()
 
 # ----------------------------------- 主程式 -----------------------------------
 
-
 # 當天資料
-# JsonToExcel(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
-# CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
+JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
+CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # start_day ~ end_day
-start_day = "0601"
-end_day = "0607"
-for date in range(int(start_day), int(end_day) + 1):
-    start_date = str(date).zfill(4)
-    end_date = str(date + 1).zfill(4)
-    print(start_date)
-    JsonToExcel(database, main_path, output_path, start_date, end_date, wb, ws1, output_type="csv")
-    CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
+# start_day = "0601"
+# end_day = "0607"
+# for date in range(int(start_day), int(end_day) + 1):
+#     start_date = str(date).zfill(4)
+#     end_date = str(date + 1).zfill(4)
+#     print(start_date)
+#     JsonToExcel(database, main_path, csv_folder, start_date, end_date, wb, ws1, output_type="csv")
+#     CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
