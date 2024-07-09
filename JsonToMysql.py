@@ -724,8 +724,6 @@ now = datetime.datetime.now()
 # ----------------------------------- 主程式 -----------------------------------
     """
     三種使用模式：
-
-    Args:
         寫入當天資料：自動抓取當日資料寫入資料庫。
         寫入過去資料：設置日期(0701 - 0702)，抓取 0701、0702 資料寫入資料庫。
         處理歷史 CSV 檔案：使用 AOI驗證測試\AI_Result\Excel Results 中的歷史資料轉檔入資料庫。
@@ -737,7 +735,7 @@ now = datetime.datetime.now()
 # 寫入過去資料
 # start_day ~ end_day
 # start_day = "0701"
-# end_day = "0701"
+# end_day = "0702"
 # for date in range(int(start_day), int(end_day) + 1):
 #     start_date = str(date).zfill(4)
 #     end_date = str(date + 1).zfill(4)
