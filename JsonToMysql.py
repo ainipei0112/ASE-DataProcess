@@ -606,27 +606,109 @@ def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name
     mycursor.close()
     mydb.close()
 
+# 將 Excel Results 中的歷史 CSV 轉換為可入資料庫的型態
+def TransformHistoricalData(old_file_path, new_file_path):
+    """
+    處理 CSV 檔案，更換欄位名稱並新增 Die_Overkill 欄位。
+
+    Args:
+        old_file_path (str): 舊 CSV 檔案的路徑。
+        new_file_path (str): 新 CSV 檔案的路徑。
+    """
+
+    # 讀取舊檔案
+    df = pd.read_csv(old_file_path)
+
+    # 欄位名稱對照表
+    column_mapping = {
+        'Date': 'Date',
+        'Date-1': 'Date_1',
+        'Lot': 'Lot',
+        'ID': 'AOI_ID',
+        'AOI scan amount': 'AOI_Scan_Amount',
+        'AOI pass amount': 'AOI_Pass_Amount',
+        'AOI reject amount': 'AOI_Reject_Amount',
+        'AOI yield(%)': 'AOI_Yield',
+        'AOI yield(%) Die Corner%': 'AOI_Yield_Die_Corner',
+        'AI pass amount': 'AI_Pass_Amount',
+        'AI reject amount': 'AI_Reject_Amount',
+        'AI yield(%)': 'AI_Yield',
+        'AI Fail corner yield(%)': 'AI_Fail_Corner_Yield',
+        'Final pass amount': 'Final_Pass_Amount',
+        'Final reject amount': 'Final_Reject_Amount',
+        'Final yield(%)': 'Final_Yield',
+        'AI EA Overkill Die Corner%': 'AI_EA_Overkill_Die_Corner',
+        'AI EA Overkill Die Surface%': 'AI_EA_Overkill_Die_Surface',
+        'AI Image Overkill Die Corner%': 'AI_Image_Overkill_Die_Corner',
+        'AI Image Overkill Die Surface%': 'AI_Image_Overkill_Die_Surface',
+        'EA over-kill Die Corner': 'EA_over_kill_Die_Corner',
+        'EA over-kill Die Surface': 'EA_over_kill_Die_Surface',
+        'Image over-kill Die Corner': 'Image_Overkill_Die_Corner',
+        'Image over-kill Die Surface': 'Image_Overkill_Die_Surface',
+        'Total Images': 'Total_Images',
+        'Image over-kill': 'Image_Overkill',
+        'AI Fail EA Die Corner': 'AI_Fail_EA_Die_Corner',
+        'AI Fail EA Die Surface': 'AI_Fail_EA_Die_Surface',
+        'AI Fail Image Die Corner': 'AI_Fail_Image_Die_Corner',
+        'AI Fail Image Die Surface': 'AI_Fail_Image_Die_Surface',
+        'AI Fail Total': 'AI_Fail_Total',
+        'Total AOI Die Corner image': 'Total_AOI_Die_Corner_Image',
+        'AI Pass': 'AI_Pass',
+        'AI reduction Die Corner(%)': 'AI_Reduction_Die_Corner',
+        'AI reduction All(%)': 'AI_Reduction_All',
+        'True fail': 'True_Fail',
+        'True fail Crack': 'True_Fail_Crack',
+        'True fail Chipout': 'True_Fail_Chipout',
+        'True fail Die Surface': 'True_Fail_Die_Surface',
+        'True fail Others': 'True_Fail_Others',
+        'EA True fail Crack': 'EA_True_Fail_Crack',
+        'EA True fail Chipout': 'EA_True_Fail_Chipout',
+        'EA True fail Die Surface': 'EA_True_Fail_Die_Surface',
+        'EA True fail Others': 'EA_True_Fail_Others',
+        'EA True fail Crack+Chipout': 'EA_True_Fail_Crack_Chipout',
+        'Device ID': 'Device_ID',
+        'OP EA Die Corner': 'OP_EA_Die_Corner',
+        'OP EA Die Surface': 'OP_EA_Die_Surface',
+        'OP EA Others': 'OP_EA_Others'
+    }
+
+    # 更換欄位名稱
+    df = df.rename(columns=column_mapping)
+
+    # 新增 Die_Overkill 欄位
+    df['Die_Overkill'] = df['AI_Reject_Amount'] - df['Final_Reject_Amount']
+
+    # 儲存新檔案
+    df.to_csv(new_file_path, index=False)
+
+    print(f"CSV file updated and saved to {new_file_path}")
+
 # ----------------------------------- 參數設定 -----------------------------------
 
 # 切換正式或測試環境的資料讀取路徑
-env = "dev"  # 環境變數
+env = "prod"  # 環境變數
 
 if env == "dev":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
     main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy"
     csv_folder = "D:\ASEKH\K18330\資料處理"
     target_folder = "D:\ASEKH\K18330\資料處理\All Data"
+    db_host = '127.0.0.1'
 elif env == "prod":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result\settings\settings.json"
     main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result"
-    csv_folder = "\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase"
-    target_folder = "\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase\All Data"
+    csv_folder = r"\\khwbpeaiaoi01\D$\khwbpeaiaoi_Shares$\K18330\DataBase"
+    target_folder = r"\\khwbpeaiaoi01\D$\khwbpeaiaoi_Shares$\K18330\DataBase\All Data"
+    db_host = '10.11.33.122'
 else:
     print("請設定正確的環境變數：dev 或 prod")
     exit()
 
+# 新、舊檔案路徑
+old_file_path = r"\\KHFS2\WBG PE Stage$\AOI 判圖\AOI驗證測試\AI_Result\Excel Results\today\old csv\All_2OAOI_0704_(Security C).csv"
+new_file_path = r"D:\ASEKH\K18330\資料處理\0704_All_(Security C).csv"
+
 # MySQL 連線資訊
-db_host = '127.0.0.1'
 db_user = 'root'
 db_password = ''
 db_name = 'wb'
@@ -641,16 +723,20 @@ now = datetime.datetime.now()
 
 # ----------------------------------- 主程式 -----------------------------------
 
-# 當天資料
-JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
-CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
+# 寫入當天資料
+# JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
+# CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
+# 寫入過去資料
 # start_day ~ end_day
 # start_day = "0701"
-# end_day = "0708"
+# end_day = "0701"
 # for date in range(int(start_day), int(end_day) + 1):
 #     start_date = str(date).zfill(4)
 #     end_date = str(date + 1).zfill(4)
 #     print(start_date)
 #     JsonToExcel(database, main_path, csv_folder, start_date, end_date, wb, ws1, output_type="csv")
 #     CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
+
+# 處理歷史 CSV 檔案
+TransformHistoricalData(old_file_path, new_file_path)

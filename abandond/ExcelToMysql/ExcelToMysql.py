@@ -6,7 +6,7 @@ import re
 import datetime
 
 # MySQL 連線資訊
-db_host = '127.0.0.1'
+db_host = '10.11.33.122'
 db_user = 'root'
 db_password = ''
 db_name = 'wb'
