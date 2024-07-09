@@ -548,11 +548,11 @@ wb, ws1 = reset_ws()
 # 執行函數
 # process_data(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
 
-# 0701~0703
-start_day = "0701"
-end_day = "0704"
+# start_day ~ end_day
+start_day = "0620"
+end_day = "0622"
 for date in range(int(start_day), int(end_day)):
     start_date = str(date).zfill(4)
-    end_date = str(date+1).zfill(4)
+    end_date = str(date+2).zfill(4)
     print(start_date)
     process_data(database, main_path, output_path, start_date, end_date, wb, ws1, output_type="csv")

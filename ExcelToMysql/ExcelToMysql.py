@@ -1,3 +1,4 @@
+import shutil
 import pandas as pd
 import mysql.connector
 import os
@@ -14,6 +15,8 @@ table_name = 'all_2oaoi'
 
 # CSV 檔案所在資料夾路徑
 csv_folder = "D:\ASEKH\K18330\資料處理"
+# 目標資料夾路徑
+target_folder = "D:\ASEKH\K18330\資料處理\All Data"
 
 # 建立 MySQL 連線
 mydb = mysql.connector.connect(
@@ -48,9 +51,6 @@ for filename in os.listdir(csv_folder):
         # 讀取 CSV 檔案
         df = pd.read_csv(csv_file)
 
-        # 檢查資料類型
-        print(df.dtypes)
-
         # 將 DataFrame 轉換成資料列表
         data = df.values.tolist()
 
@@ -63,6 +63,19 @@ for filename in os.listdir(csv_folder):
             rows_inserted = mycursor.rowcount
             total_rows_inserted += rows_inserted
             print(f"File: {filename} IN {rows_inserted}!")
+
+            # 取得檔案月份
+            month = filename[:2]
+
+            # 構建目標資料夾路徑
+            month_folder = os.path.join(target_folder, month)
+
+            # 檢查資料夾是否存在，不存在則建立資料夾
+            if not os.path.exists(month_folder):
+                os.makedirs(month_folder)
+
+            # 移動檔案
+            shutil.move(csv_file, month_folder)
         except mysql.connector.Error as error:
             print(f"File: {filename} ERROR: {error}")
 
