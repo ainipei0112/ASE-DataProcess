@@ -547,6 +547,8 @@ wb, ws1 = reset_ws()
 
 # 執行函數
 # process_data(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
+
+# 0701~0703
 start_day = "0701"
 end_day = "0704"
 for date in range(int(start_day), int(end_day)):
