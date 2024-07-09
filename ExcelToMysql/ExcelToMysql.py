@@ -3,6 +3,7 @@ import pandas as pd
 import mysql.connector
 import os
 import re
+import datetime
 
 # MySQL 連線資訊
 db_host = '127.0.0.1'
@@ -67,8 +68,11 @@ for filename in os.listdir(csv_folder):
             # 取得檔案月份
             month = filename[:2]
 
+            # 取得當年的年份
+            current_year = datetime.datetime.now().year
+
             # 構建目標資料夾路徑
-            month_folder = os.path.join(target_folder, month)
+            month_folder = os.path.join(target_folder, str(current_year), month)
 
             # 檢查資料夾是否存在，不存在則建立資料夾
             if not os.path.exists(month_folder):

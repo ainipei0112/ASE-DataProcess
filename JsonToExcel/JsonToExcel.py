@@ -64,28 +64,24 @@ def process_data(database, main_path, output_path, yesterday, today, wb, ws1, we
     today1 = datetime.datetime.strptime(today_str, '%Y-%m-%d %H:%M:%S')
     
     # 主路徑下所有的文件夾及文件
-    directories = [f.path for f in os.scandir(main_path) if f.is_dir()]
+    directories = [f.path for f in os.scandir(main_path)]
     for date_directory in directories:
         if os.path.isfile(date_directory):
             filename = date_directory.split("\\")[-1]
             if date_directory.endswith("csv"):
                 excel_files.append(filename.split("_")[-2])
             trash.append(date_directory)
-
-    directories = [d for d in directories if d not in trash]
-
-    for directory in directories:
-        lot_names = [f.path for f in os.scandir(directory) if f.is_dir()]
-
-        for lot_name in lot_names:
-            Json_files = [f.path for f in os.scandir(lot_name) if f.is_file() and f.path.endswith('.json')]
-
-            for Json_file in Json_files:
-                try:
-                    with open(Json_file) as json_file:
-                        data = json.load(json_file)
-                except:
-                    pass
+    
+    for date_directory in directories:
+        if os.path.isdir(date_directory):
+            directory_name = date_directory.split("\\")[-1]
+            try:
+                date_folder = datetime.datetime.strptime(directory_name, "%Y-%m-%d")
+                if date_folder < date_yesterday or date_folder > date_today:
+                    trash.append(date_directory)
+                    continue
+            except:
+                pass
 
     # 清理垃圾文件
     directories = [d for d in directories if d not in trash]  # 使用列表推導式替換刪除迴圈
@@ -524,7 +520,7 @@ def process_data(database, main_path, output_path, yesterday, today, wb, ws1, we
 # ----------------------------------- 主程式 -----------------------------------
 
 # 切換正式或測試環境的資料讀取路徑
-env = "dev"  # 環境變數
+env = "prod"  # 環境變數
 
 if env == "dev":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
@@ -549,10 +545,10 @@ wb, ws1 = reset_ws()
 # process_data(database, main_path, output_path,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
 
 # start_day ~ end_day
-start_day = "0620"
-end_day = "0622"
-for date in range(int(start_day), int(end_day)):
+start_day = "0601"
+end_day = "0607"
+for date in range(int(start_day), int(end_day) + 1):
     start_date = str(date).zfill(4)
-    end_date = str(date+2).zfill(4)
+    end_date = str(date + 1).zfill(4)
     print(start_date)
     process_data(database, main_path, output_path, start_date, end_date, wb, ws1, output_type="csv")

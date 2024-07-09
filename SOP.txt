@@ -3,11 +3,10 @@ https://www.johntool.com/batch-open-files-automatically/
 
 ◎讓server能自動寫入資料庫
 
-整合匯出excel和用excel寫入資料庫程式
 
 每天8點執行自動抓資料寫入資料庫
 
-
+先從6月初開始補資料
 
 
 讓主機能安裝套件
