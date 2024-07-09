@@ -722,8 +722,15 @@ database = read_Jsonfile(settings_path)
 now = datetime.datetime.now()
 
 # ----------------------------------- 主程式 -----------------------------------
+    """
+    三種使用模式：
 
-# 寫入當天資料
+    Args:
+        寫入當天資料：自動抓取當日資料寫入資料庫。
+        寫入過去資料：設置日期(0701 - 0702)，抓取 0701、0702 資料寫入資料庫。
+        處理歷史 CSV 檔案：使用 AOI驗證測試\AI_Result\Excel Results 中的歷史資料轉檔入資料庫。
+    """
+# 寫入當日資料
 # JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
 # CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
@@ -739,4 +746,5 @@ now = datetime.datetime.now()
 #     CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # 處理歷史 CSV 檔案
-TransformHistoricalData(old_file_path, new_file_path)
+# TransformHistoricalData(old_file_path, new_file_path)
+# CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
