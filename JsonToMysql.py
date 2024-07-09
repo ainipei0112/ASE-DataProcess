@@ -646,8 +646,8 @@ JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strft
 CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # start_day ~ end_day
-# start_day = "0601"
-# end_day = "0607"
+# start_day = "0701"
+# end_day = "0708"
 # for date in range(int(start_day), int(end_day) + 1):
 #     start_date = str(date).zfill(4)
 #     end_date = str(date + 1).zfill(4)
