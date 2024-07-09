@@ -693,20 +693,21 @@ if env == "dev":
     main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy"
     csv_folder = "D:\ASEKH\K18330\資料處理"
     target_folder = "D:\ASEKH\K18330\資料處理\All Data"
+    new_file_path = r"D:\ASEKH\K18330\資料處理\0704_All_(Security C).csv"
     db_host = '127.0.0.1'
 elif env == "prod":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result\settings\settings.json"
     main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result"
     csv_folder = r"\\khwbpeaiaoi01\D$\khwbpeaiaoi_Shares$\K18330\DataBase"
     target_folder = r"\\khwbpeaiaoi01\D$\khwbpeaiaoi_Shares$\K18330\DataBase\All Data"
+    new_file_path = r"\\khwbpeaiaoi01\D$\khwbpeaiaoi_Shares$\K18330\DataBase\0704_All_(Security C).csv"
     db_host = '10.11.33.122'
 else:
     print("請設定正確的環境變數：dev 或 prod")
     exit()
 
-# 新、舊檔案路徑
+# AOI驗證測試\AI_Result\Excel Results 檔案路徑
 old_file_path = r"\\KHFS2\WBG PE Stage$\AOI 判圖\AOI驗證測試\AI_Result\Excel Results\today\old csv\All_2OAOI_0704_(Security C).csv"
-new_file_path = r"D:\ASEKH\K18330\資料處理\0704_All_(Security C).csv"
 
 # MySQL 連線資訊
 db_user = 'root'
