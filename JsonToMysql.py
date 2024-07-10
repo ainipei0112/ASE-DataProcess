@@ -691,7 +691,7 @@ def TransformHistoricalData(old_file_path, new_file_path):
 # ----------------------------------- 參數設定 -----------------------------------
 
 # 要切換的 AI_Result\Excel Results 歷史檔案日期
-set_date = "0709"
+set_date = "0630"
 
 # AOI驗證測試\AI_Result\Excel Results 檔案路徑
 old_file_path = r"\\KHFS2\WBG PE Stage$\AOI 判圖\AOI驗證測試\AI_Result\Excel Results\today\old csv\All_2OAOI_{}_(Security C).csv".format(set_date)
@@ -741,10 +741,9 @@ now = datetime.datetime.now()
 # JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
 # CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
-# 寫入過去資料
-# start_day ~ end_day
-# start_day = "0701"
-# end_day = "0702"
+# 寫入過去資料 start_day ~ end_day
+# start_day = "0615"
+# end_day = "0616"
 # for date in range(int(start_day), int(end_day) + 1):
 #     start_date = str(date).zfill(4)
 #     end_date = str(date + 1).zfill(4)
@@ -753,5 +752,5 @@ now = datetime.datetime.now()
 #     CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # 處理歷史 CSV 檔案
-TransformHistoricalData(old_file_path, new_file_path)
-CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
+# TransformHistoricalData(old_file_path, new_file_path)
+# CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
