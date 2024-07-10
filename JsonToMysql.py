@@ -753,4 +753,4 @@ now = datetime.datetime.now()
 
 # 處理歷史 CSV 檔案
 # TransformHistoricalData(old_file_path, new_file_path)
-# CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
+CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
