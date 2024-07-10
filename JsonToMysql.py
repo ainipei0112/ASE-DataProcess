@@ -4,6 +4,7 @@ import csv
 import json
 import time
 import shutil
+import chardet
 import datetime
 import numpy as np
 import pandas as pd
@@ -616,8 +617,12 @@ def TransformHistoricalData(old_file_path, new_file_path):
         new_file_path (str): 新 CSV 檔案的路徑。
     """
 
-    # 讀取舊檔案
-    df = pd.read_csv(old_file_path)
+    # 偵測檔案編碼
+    with open(old_file_path, 'rb') as f:
+        encoding = chardet.detect(f.read())['encoding']
+
+    # 讀取舊檔案，指定編碼
+    df = pd.read_csv(old_file_path, encoding=encoding)
 
     # 欄位名稱對照表
     column_mapping = {
@@ -679,35 +684,38 @@ def TransformHistoricalData(old_file_path, new_file_path):
     df['Die_Overkill'] = df['AI_Reject_Amount'] - df['Final_Reject_Amount']
 
     # 儲存新檔案
-    df.to_csv(new_file_path, index=False)
+    df.to_csv(new_file_path, index=False, encoding=encoding)
 
     print(f"CSV file updated and saved to {new_file_path}")
 
 # ----------------------------------- 參數設定 -----------------------------------
 
+# 要切換的 AI_Result\Excel Results 歷史檔案日期
+set_date = "0709"
+
+# AOI驗證測試\AI_Result\Excel Results 檔案路徑
+old_file_path = r"\\KHFS2\WBG PE Stage$\AOI 判圖\AOI驗證測試\AI_Result\Excel Results\today\old csv\All_2OAOI_{}_(Security C).csv".format(set_date)
+
 # 切換正式或測試環境的資料讀取路徑
-env = "prod"  # 環境變數
+env = "dev"  # 環境變數
 
 if env == "dev":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
     main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy"
     csv_folder = "D:\ASEKH\K18330\資料處理"
     target_folder = "D:\ASEKH\K18330\資料處理\All Data"
-    new_file_path = r"D:\ASEKH\K18330\資料處理\0704_All_(Security C).csv"
+    new_file_path = r"D:\ASEKH\K18330\資料處理\{}_All_(Security C).csv".format(set_date)
     db_host = '127.0.0.1'
 elif env == "prod":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result\settings\settings.json"
     main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result"
     csv_folder = r"\\khwbpeaiaoi01\D$\khwbpeaiaoi_Shares$\K18330\DataBase"
     target_folder = r"\\khwbpeaiaoi01\D$\khwbpeaiaoi_Shares$\K18330\DataBase\All Data"
-    new_file_path = r"\\khwbpeaiaoi01\D$\khwbpeaiaoi_Shares$\K18330\DataBase\0704_All_(Security C).csv"
+    new_file_path = r"\\khwbpeaiaoi01\D$\khwbpeaiaoi_Shares$\K18330\DataBase\{}_All_(Security C).csv".format(set_date)
     db_host = '10.11.33.122'
 else:
     print("請設定正確的環境變數：dev 或 prod")
     exit()
-
-# AOI驗證測試\AI_Result\Excel Results 檔案路徑
-old_file_path = r"\\KHFS2\WBG PE Stage$\AOI 判圖\AOI驗證測試\AI_Result\Excel Results\today\old csv\All_2OAOI_0704_(Security C).csv"
 
 # MySQL 連線資訊
 db_user = 'root'
@@ -723,12 +731,12 @@ database = read_Jsonfile(settings_path)
 now = datetime.datetime.now()
 
 # ----------------------------------- 主程式 -----------------------------------
-    """
-    三種使用模式：
-        寫入當天資料：自動抓取當日資料寫入資料庫。
-        寫入過去資料：設置日期(0701 - 0702)，抓取 0701、0702 資料寫入資料庫。
-        處理歷史 CSV 檔案：使用 AOI驗證測試\AI_Result\Excel Results 中的歷史資料轉檔入資料庫。
-    """
+
+    # 三種使用模式：
+    #     寫入當天資料：自動抓取當日資料寫入資料庫。
+    #     寫入過去資料：設置日期(0701 - 0702)，抓取 0701、0702 資料寫入資料庫。
+    #     處理歷史 CSV 檔案：使用 AOI驗證測試\AI_Result\Excel Results 中的歷史資料轉檔入資料庫。
+
 # 寫入當日資料
 # JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
 # CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
@@ -745,5 +753,5 @@ now = datetime.datetime.now()
 #     CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # 處理歷史 CSV 檔案
-# TransformHistoricalData(old_file_path, new_file_path)
-# CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
+TransformHistoricalData(old_file_path, new_file_path)
+CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
