@@ -1,10 +1,6 @@
 https://www.johntool.com/batch-open-files-automatically/
 設定每日自動排程執行批次檔
 
-讓主機能安裝套件
+主機無法安裝套件解法：使用 --trusted-host 選項 或 使用其他 PyPI 鏡像庫
 pip install --trusted-host pypi.tuna.tsinghua.edu.cn --trusted-host mirrors.aliyun.com mysql-connector-python
-以上為安裝mysql-connector
-
-可能的原因：
-使用 --trusted-host 選項成功： pip 現在直接信任了 PyPI 鏡像庫，不再需要驗證證書，從而順利下載了套件。
-使用其他 PyPI 鏡像庫成功： 你選擇的其他鏡像庫的證書可能是有效的，或者沒有使用自簽證書，因此 pip 可以順利驗證證書並下載套件。
+以上為安裝 mysql-connector
