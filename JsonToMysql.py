@@ -697,7 +697,7 @@ set_date = "0630"
 old_file_path = r"\\KHFS2\WBG PE Stage$\AOI 判圖\AOI驗證測試\AI_Result\Excel Results\today\old csv\All_2OAOI_{}_(Security C).csv".format(set_date)
 
 # 切換正式或測試環境的資料讀取路徑
-env = "dev"  # 環境變數
+env = "prod"  # 環境變數
 
 if env == "dev":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
@@ -738,8 +738,8 @@ now = datetime.datetime.now()
     #     處理歷史 CSV 檔案：使用 AOI驗證測試\AI_Result\Excel Results 中的歷史資料轉檔入資料庫。
 
 # 寫入當日資料
-# JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
-# CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
+JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strftime('%m%d'), now.strftime('%m%d'), wb, ws1, output_type="csv")
+CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # 寫入過去資料 start_day ~ end_day
 # start_day = "0615"
@@ -753,4 +753,4 @@ now = datetime.datetime.now()
 
 # 處理歷史 CSV 檔案
 # TransformHistoricalData(old_file_path, new_file_path)
-CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
+# CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)

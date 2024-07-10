@@ -1,14 +1,6 @@
 https://www.johntool.com/batch-open-files-automatically/
 設定每日自動排程執行批次檔
 
-◎讓server能自動寫入資料庫
-
-
-每天8點執行自動抓資料寫入資料庫
-
-先從6月初開始補資料
-
-
 讓主機能安裝套件
 pip install --trusted-host pypi.tuna.tsinghua.edu.cn --trusted-host mirrors.aliyun.com mysql-connector-python
 以上為安裝mysql-connector
