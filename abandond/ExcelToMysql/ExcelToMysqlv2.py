@@ -21,7 +21,7 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 
 # Excel 檔案所在資料夾路徑
-excel_folder = r'D:\ASEKH\K18330\資料處理'
+excel_folder = r'D:\ASEKH\K18330\DataProcess'
 
 # 定義欄位對應關係 Excel:MySQL
 field_mapping = {

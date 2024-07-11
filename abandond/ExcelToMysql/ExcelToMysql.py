@@ -15,9 +15,9 @@ db_name = 'wb'
 table_name = 'all_2oaoi'
 
 # CSV 檔案所在資料夾路徑
-csv_folder = "D:\ASEKH\K18330\資料處理"
+csv_folder = "D:\ASEKH\K18330\DataProcess"
 # 目標資料夾路徑
-target_folder = "D:\ASEKH\K18330\資料處理\All Data"
+target_folder = "D:\ASEKH\K18330\DataProcess\All Data"
 
 # 建立 MySQL 連線
 mydb = mysql.connector.connect(

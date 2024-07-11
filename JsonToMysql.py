@@ -702,9 +702,9 @@ env = "prod"  # 環境變數
 if env == "dev":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
     main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy"
-    csv_folder = "D:\ASEKH\K18330\資料處理"
-    target_folder = "D:\ASEKH\K18330\資料處理\All Data"
-    new_file_path = r"D:\ASEKH\K18330\資料處理\{}_All_(Security C).csv".format(set_date)
+    csv_folder = "D:\ASEKH\K18330\DataProcess"
+    target_folder = "D:\ASEKH\K18330\DataProcess\All Data"
+    new_file_path = r"D:\ASEKH\K18330\DataProcess\{}_All_(Security C).csv".format(set_date)
     db_host = '127.0.0.1'
 elif env == "prod":
     settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result\settings\settings.json"

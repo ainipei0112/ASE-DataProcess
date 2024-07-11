@@ -145,7 +145,7 @@ def process_json_data(directory, database, yesterday1, today1, wb, ws1):
         directory_name = directory.split('\\')[-1]
         directory_name = directory_name.split("-")[1:]
         directory_name = "".join(directory_name)
-        csv_path = r'D:\ASEKH\K18330\資料處理' + "\\" + yesterday1.strftime('%m%d') + "_All_(Security C)" + ".csv"
+        csv_path = r'D:\ASEKH\K18330\DataProcess' + "\\" + yesterday1.strftime('%m%d') + "_All_(Security C)" + ".csv"
         # csv_path = r'\\10.11.33.122\D$\khwbpeaiaoi_Shares$\K18330\DataBase' + "\\" + yesterday1.strftime('%m%d') + "_All_(Security C)" + ".csv"
         with open(csv_path, 'w', newline='') as output_file:
             dict_writer = csv.DictWriter(output_file, keys)
@@ -204,7 +204,7 @@ table_name = 'all_2oaoi'
 # 設定資料夾路徑
 settings_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy\settings.json"
 main_path = r"\\khwbpeaiaoi01\2451AOI$\WaferMapTemp\AI_Result - Copy"
-excel_folder = "C:\\Users\K18330\Desktop\\資料處理"
+excel_folder = "C:\\Users\K18330\Desktop\\DataProcess"
 
 # 讀取資料庫設定
 database = read_database_settings(settings_path)
