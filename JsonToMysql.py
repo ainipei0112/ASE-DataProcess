@@ -32,10 +32,10 @@ def reset_ws():
     wb = Workbook()
     ws1 = wb.active
     ws1.title = '工作表1'
-    
+
     # 標題欄位
     column_titles = ['Date', 'Date_1', 'Lot', 'AOI_ID', 'AOI_Scan_Amount', 'AOI_Pass_Amount', 'AOI_Reject_Amount', 'AOI_Yield', 'AOI_Yield_Die_Corner', 'AI_Pass_Amount', 'AI_Reject_Amount', 'AI_Yield', 'AI_Fail_Corner_Yield', 'Final_Pass_Amount', 'Final_Reject_Amount', 'Final_Yield', 'AI_EA_Overkill_Die_Corner', 'AI_EA_Overkill_Die_Surface', 'AI_Image_Overkill_Die_Corner', 'AI_Image_Overkill_Die_Surface', 'EA_over_kill_Die_Corner', 'EA_over_kill_Die_Surface', 'Image_Overkill_Die_Corner', 'Image_Overkill_Die_Surface', 'Total_Images', 'Image_Overkill', 'AI_Fail_EA_Die_Corner', 'AI_Fail_EA_Die_Surface', 'AI_Fail_Image_Die_Corner', 'AI_Fail_Image_Die_Surface', 'AI_Fail_Total', 'Total_AOI_Die_Corner_Image', 'AI_Pass', 'AI_Reduction_Die_Corner', 'AI_Reduction_All', 'True_Fail', 'True_Fail_Crack', 'True_Fail_Chipout', 'True_Fail_Die_Surface', 'True_Fail_Others', 'EA_True_Fail_Crack', 'EA_True_Fail_Chipout', 'EA_True_Fail_Die_Surface', 'EA_True_Fail_Others', 'EA_True_Fail_Crack_Chipout', 'Device_ID', 'OP_EA_Die_Corner', 'OP_EA_Die_Surface', 'OP_EA_Others', 'Die_Overkill']
-    
+
     for i, title in enumerate(column_titles, start=1):
         cell = ws1.cell(row=1, column=i, value=title)
         ws1.column_dimensions[get_column_letter(i)].width = 22
@@ -46,7 +46,7 @@ def reset_ws():
         cell.font = Font(name='Microsoft YaHei', size=12)
         cell.alignment = Alignment(vertical='center', horizontal='center')
         cell.border = Border(left=side1, right=side1, top=side1, bottom=side1)
-    
+
     ws1.row_dimensions[1].height = 49.5
     return wb, ws1
 
@@ -66,7 +66,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
     today_str = datetime.datetime.strftime(date_today, '%Y-%m-%d 07:30:00')
     yesterday1 = datetime.datetime.strptime(yesterday_str, '%Y-%m-%d %H:%M:%S')
     today1 = datetime.datetime.strptime(today_str, '%Y-%m-%d %H:%M:%S')
-    
+
     # 主路徑下所有的文件夾及文件
     directories = [f.path for f in os.scandir(main_path)]
     for date_directory in directories:
@@ -75,7 +75,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
             if date_directory.endswith("csv"):
                 excel_files.append(filename.split("_")[-2])
             trash.append(date_directory)
-    
+
     for date_directory in directories:
         if os.path.isdir(date_directory):
             directory_name = date_directory.split("\\")[-1]
@@ -89,7 +89,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
 
     # 清理垃圾文件
     directories = [d for d in directories if d not in trash]  # 使用列表推導式替換刪除迴圈
-    
+
     # 將所有 Json 進行邏輯運算
     for directory in directories: # 所有日期的資料夾
         lot_names = [f.path for f in os.scandir(directory) if os.path.isdir(f.path)]
@@ -105,7 +105,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                 except:
                     pass
 
-                if "OP_Checked" in data : # 確認 JSON 是否 "OP_Checked" 
+                if "OP_Checked" in data : # 確認 JSON 是否 "OP_Checked"
                     if data["AOI_Scan_Amount"] != 0 : # 確認 AOI 掃描數量不為 0
                         incorrect_mag_counter = 0
                         chipout_counter = 0
@@ -128,7 +128,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                         for file_data in data["AI_FailDetails"]:
                             if not file_data["id"] in xdie:
                                 continue
-                            
+
                             # 根據不同的 aoidefecttype 進行計數
                             if(file_data["aoiDefectType"] == "Incorrect_Magnification" or file_data["aoiDefectType"] == "Incorrect_Size" or file_data["aoiDefectType"] =="Scratch" or file_data["aoiDefectType"] =="Passivation_Effect" or file_data["aoiDefectType"] =="OP_Ink"):
                                 incorrect_mag_counter += 1
@@ -158,7 +158,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                     if(file_data["id"] == tempdata["id"]):
                                         op_others_counter +=1
                                         break
-                        
+
                             # 獲取 XY 座標
                             XY = file_data["fileName"].split("_")[5:9]
                             XY = "_".join(XY)
@@ -174,7 +174,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                     corner_duplicate_Checker[XY] +=1
                                 else:
                                     corner_duplicate_Checker[XY] = 1
-                        
+
                         EA_Fail_die = len(die_duplicate_Checker)
                         EA_Fail_corner = len(corner_duplicate_Checker)
                         OP_ChipOut={}
@@ -206,7 +206,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                         OP_Others[XY] = 1
                             except:
                                 pass
-                        
+
                         print(Json_file)
                         OG_loc = Json_file.split("\\")
                         date_obj = datetime.datetime.strptime(OG_loc[6], "%Y-%m-%d")
@@ -219,7 +219,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                             break
                         else:
                             print('OK',OG_Loc)
-                        
+
                         for file_data in os.scandir(OG_Loc):
                             if(file_data.name.endswith("jpg")):
                                 XY = file_data.name.split("_")[5:9]
@@ -228,7 +228,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                     duplicate_Checker[XY] +=1
                                 else:
                                     duplicate_Checker[XY] = 1
-                        
+
                         AOI_Fail = len(duplicate_Checker)
                         ai_total_image = (int(data["AI_Pass"]) + int(data["AI_Fail"]))
                         total_overkill = op_crack_counter + op_chipout_counter + op_incorrect_mag_counter + op_others_counter
@@ -253,13 +253,13 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
 
                         if incorrect_mag_counter == 0:
                             incorrect_mag_overkill_per = 0
-                        else:   
+                        else:
                             incorrect_mag_overkill_per = float(op_incorrect_mag_counter)/float(ai_total_image)
-                        
+
                         data_filename = Json_file.split("\\")[-1]
                         data_filename = data_filename.split(".")[:-1]
                         data_filename = ".".join(data_filename)
-                        
+
                         print(data_filename)
                         bre = False
                         for database_data in database:
@@ -269,10 +269,10 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                 print("IN!")
                                 bre = True
                                 break
-                        
+
                         if not (bre):
                             continue
-                        
+
                         for database_data in database:
                             if(database_data["filename"] == data_filename):
                                 data_date = database_data["Date"]
@@ -300,7 +300,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                 if XY == OP_XY:
                                     fail = True
                                     break
-                            
+
                             if fail:
                                 if XY in EA_OP_Duplicate_Checker:
                                     if file_data["aoiDefectType"] in ("Incorrect_Magnification", "Incorrect_Size", "Scratch", "Passivation_Effect", "OP_Ink"):
@@ -337,15 +337,15 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                             date_day=datetime.datetime.strptime(data_date, "%Y-%m-%d %H:%M:%S").date()
                         else:
                             date_day=(datetime.datetime.strptime(data_date, "%Y-%m-%d %H:%M:%S")-datetime.timedelta(1)).date()
-                        
+
                         data_dictionary = {
-                            "Date" : data_date, 
+                            "Date" : data_date,
                             "Date_1" : date_day,
-                            "Lot" : lot_name.split("\\")[-1], 
-                            "AOI_ID" : Json_file.split(".")[-2], 
+                            "Lot" : lot_name.split("\\")[-1],
+                            "AOI_ID" : Json_file.split(".")[-2],
                             "AOI_Scan_Amount" : data["AOI_Scan_Amount"],
                             "AOI_Pass_Amount" : data["AOI_Scan_Amount"]-AOI_Fail,
-                            "AOI_Reject_Amount" : AOI_Fail, 
+                            "AOI_Reject_Amount" : AOI_Fail,
                             "AOI_Yield" :   float(data["AOI_Scan_Amount"]-AOI_Fail)/float(data["AOI_Scan_Amount"]),
                             "AOI_Yield_Die_Corner" :   float(data["AOI_Scan_Amount"]-(AOI_Fail-EA_Fail_die))/float(data["AOI_Scan_Amount"]),
                             "AI_Pass_Amount" : int(data["AOI_Scan_Amount"]) - (EA_Fail_corner + EA_Fail_die),
@@ -353,7 +353,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                             "AI_Yield" :float(int(data["AOI_Scan_Amount"]) - (EA_Fail_corner + EA_Fail_die)) / float(data["AOI_Scan_Amount"]),
                             "AI_Fail_Corner_Yield" :float(data["AOI_Scan_Amount"] - EA_Fail_corner) / float(data["AOI_Scan_Amount"]),
                             "Final_Pass_Amount" : data["Pass_Amount"],
-                            "Final_Reject_Amount" : data["Reject_Amount"], 
+                            "Final_Reject_Amount" : data["Reject_Amount"],
                             "Final_Yield" : AI_Yield,
                             "AI_EA_Overkill_Die_Corner" : (float(len(corner_duplicate_Checker))/float(data["AOI_Scan_Amount"])) if len(corner_duplicate_Checker) != 0 else 0,
                             "AI_EA_Overkill_Die_Surface" : (float(len(die_duplicate_Checker))/float(data["AOI_Scan_Amount"]))if len(die_duplicate_Checker) != 0 else 0,
@@ -366,14 +366,14 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                             "Total_Images" : ai_total_image,
                             "Image_Overkill" : abs(total_overkill - op_incorrect_mag_counter)+op_incorrect_mag_counter,
                             "AI_Fail_EA_Die_Corner" : EA_Fail_corner,
-                            "AI_Fail_EA_Die_Surface" : EA_Fail_die, 
+                            "AI_Fail_EA_Die_Surface" : EA_Fail_die,
                             "AI_Fail_Image_Die_Corner" : crack_counter + chipout_counter + others_counter,
                             "AI_Fail_Image_Die_Surface" : incorrect_mag_counter,
                             "AI_Fail_Total" : total_ai_fail,
                             "Total_AOI_Die_Corner_Image" : ai_total_image-incorrect_mag_counter,
-                            "AI_Pass" : data["AI_Pass"], 
-                            "AI_Reduction_Die_Corner" : ai_reduction_Sawpercent, 
-                            "AI_Reduction_All" : ai_reduction_percent, 
+                            "AI_Pass" : data["AI_Pass"],
+                            "AI_Reduction_Die_Corner" : ai_reduction_Sawpercent,
+                            "AI_Reduction_All" : ai_reduction_percent,
                             "True_Fail" : len(data["OP_FailDetails"]),
                             "True_Fail_Crack" : True_Fail_Crack,
                             "True_Fail_Chipout" :True_Fail_Chipout,
@@ -382,7 +382,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                             "EA_True_Fail_Crack" : EA_OP_Crack ,
                             "EA_True_Fail_Chipout" : EA_OP_Chipout,
                             "EA_True_Fail_Die_Surface" : EA_OP_DieSurface,
-                            "EA_True_Fail_Others": EA_OP_Others, 
+                            "EA_True_Fail_Others": EA_OP_Others,
                             "EA_True_Fail_Crack_Chipout" : EA_OP_Crack+EA_OP_Chipout,
                             "Device_ID" : data_device_ID,
                             "OP_EA_Die_Corner" : len(OP_ChipOut),
@@ -391,12 +391,12 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                             "Die_Overkill": EA_Fail_corner + EA_Fail_die - data["Reject_Amount"]
                         }
                         list_data.append(data_dictionary)
-    
+
     for dic in list_data:
         now1 = datetime.datetime.strptime(dic["Date"], '%Y-%m-%d %H:%M:%S')
         if yesterday1 <= now1 <= today1:
             list_data_t.append(dic)
-    
+
     list_data_t = sorted(list_data_t, key=lambda x: x["Date"])
     for dic in list_data_t:
         list_data2.append(dic)
@@ -428,9 +428,9 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                 side1 = Side(color='000000', style='thin')
                 cells = ws1['A' + str(excel_row):'AX' + str(excel_row)]
                 for cell in cells:
-                    for cel in cell:        
+                    for cel in cell:
                         cel.font = Font(name='新細明體', size=12)
-                        cel.alignment = Alignment(vertical='center', horizontal='center') 
+                        cel.alignment = Alignment(vertical='center', horizontal='center')
                         cel.border = Border(left=side1, right=side1, top=side1, bottom=side1)
 
                 # 設定數字格式
@@ -507,7 +507,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                 }
                 for column, key in data_mapping.items():
                     ws1[column + str(excel_row)] = list[key]
-            
+
                 excel_row += 1
 
             # 匯出Excel
