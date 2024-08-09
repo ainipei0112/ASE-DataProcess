@@ -209,7 +209,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                         OP_Bond_Pad[XY] +=1
                                     else:
                                         OP_Bond_Pad[XY] = 1
-                                elif file_data["aoiDefectType"] in ("chipout", "Chipout", "Large Sawline", "Large Chipout"):
+                                elif file_data["aoiDefectType"] in ("chipout", "Chipout", "Large Sawline", "Large_Chipout"):
                                     if(XY in OP_ChipOut):
                                         OP_ChipOut[XY] +=1
                                     else:
@@ -234,17 +234,12 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                         OP_Film_Burr[XY] +=1
                                     else:
                                         OP_Film_Burr[XY] = 1
-                                elif file_data["aoiDefectType"]=="Large Chipout":
-                                    if(XY in OP_Large_Chipout):
-                                        OP_Large_Chipout[XY] +=1
-                                    else:
-                                        OP_Large_Chipout[XY] = 1
                                 elif file_data["aoiDefectType"]=="Metal Scratch":
                                     if(XY in OP_Metal_Scratch):
                                         OP_Metal_Scratch[XY] +=1
                                     else:
                                         OP_Metal_Scratch[XY] = 1
-                                elif file_data["aoiDefectType"]=="Op Ink":
+                                elif file_data["aoiDefectType"]=="Op_Ink":
                                     if(XY in OP_Op_Ink):
                                         OP_Op_Ink[XY] +=1
                                     else:
@@ -259,22 +254,22 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                         OP_Pad_Halo[XY] +=1
                                     else:
                                         OP_Pad_Halo[XY] = 1
-                                elif file_data["aoiDefectType"] in ("Pad Particle", "Label Fail"):
+                                elif file_data["aoiDefectType"] in ("Pad_Particle", "Label Fail"):
                                     if(XY in OP_Pad_Particle):
                                         OP_Pad_Particle[XY] +=1
                                     else:
                                         OP_Pad_Particle[XY] = 1
-                                elif file_data["aoiDefectType"]=="Passivation Effect":
+                                elif file_data["aoiDefectType"]=="Passivation_Effect":
                                     if(XY in OP_Passivation_Effect):
                                         OP_Passivation_Effect[XY] +=1
                                     else:
                                         OP_Passivation_Effect[XY] = 1
-                                elif file_data["aoiDefectType"]=="Pitting Pad":
+                                elif file_data["aoiDefectType"]=="Pitting_Pad":
                                     if(XY in OP_Pitting_Pad):
                                         OP_Pitting_Pad[XY] +=1
                                     else:
                                         OP_Pitting_Pad[XY] = 1
-                                elif file_data["aoiDefectType"]=="Probing short":
+                                elif file_data["aoiDefectType"]=="Probing_short":
                                     if(XY in OP_Probing_short):
                                         OP_Probing_short[XY] +=1
                                     else:
