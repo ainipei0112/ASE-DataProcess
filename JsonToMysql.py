@@ -34,7 +34,7 @@ def reset_ws():
     ws1.title = '工作表1'
 
     # 標題欄位
-    column_titles = ['Date', 'Date_1', 'Lot', 'AOI_ID', 'AOI_Scan_Amount', 'AOI_Pass_Amount', 'AOI_Reject_Amount', 'AOI_Yield', 'AOI_Yield_Die_Corner', 'AI_Pass_Amount', 'AI_Reject_Amount', 'AI_Yield', 'AI_Fail_Corner_Yield', 'Final_Pass_Amount', 'Final_Reject_Amount', 'Final_Yield', 'AI_EA_Overkill_Die_Corner', 'AI_EA_Overkill_Die_Surface', 'AI_Image_Overkill_Die_Corner', 'AI_Image_Overkill_Die_Surface', 'EA_over_kill_Die_Corner', 'EA_over_kill_Die_Surface', 'Image_Overkill_Die_Corner', 'Image_Overkill_Die_Surface', 'Total_Images', 'Image_Overkill', 'AI_Fail_EA_Die_Corner', 'AI_Fail_EA_Die_Surface', 'AI_Fail_Image_Die_Corner', 'AI_Fail_Image_Die_Surface', 'AI_Fail_Total', 'Total_AOI_Die_Corner_Image', 'AI_Pass', 'AI_Reduction_Die_Corner', 'AI_Reduction_All', 'True_Fail', 'True_Fail_Crack', 'True_Fail_Chipout', 'True_Fail_Die_Surface', 'True_Fail_Others', 'EA_True_Fail_Crack', 'EA_True_Fail_Chipout', 'EA_True_Fail_Die_Surface', 'EA_True_Fail_Others', 'EA_True_Fail_Crack_Chipout', 'Device_ID', 'OP_EA_Bond_Pad', 'OP_EA_Die_Corner', 'OP_EA_Crack', 'OP_EA_Edge_Die', 'OP_EA_Exessive_Probe_Mark','OP_EA_Film_Burr', 'OP_EA_Die_Surface', 'OP_EA_Op_Ink', 'OP_EA_Pad_Damage', 'OP_EA_Pad_Halo','OP_EA_Pad_Particle', 'OP_EA_Passivation_Effect', 'OP_EA_Pitting_Pad', 'OP_EA_Probing_Short','OP_EA_Residue', 'OP_EA_Scratch', 'OP_EA_Surface_Damage', 'OP_EA_Others', 'Die_Overkill']
+    column_titles = ['Date', 'Date_1', 'Lot', 'AOI_ID', 'AOI_Scan_Amount', 'AOI_Pass_Amount', 'AOI_Reject_Amount', 'AOI_Yield', 'AOI_Yield_Die_Corner', 'AI_Pass_Amount', 'AI_Reject_Amount', 'AI_Yield', 'AI_Fail_Corner_Yield', 'Final_Pass_Amount', 'Final_Reject_Amount', 'Final_Yield', 'AI_EA_Overkill_Die_Corner', 'AI_EA_Overkill_Die_Surface', 'AI_Image_Overkill_Die_Corner', 'AI_Image_Overkill_Die_Surface', 'EA_over_kill_Die_Corner', 'EA_over_kill_Die_Surface', 'Image_Overkill_Die_Corner', 'Image_Overkill_Die_Surface', 'Total_Images', 'Image_Overkill', 'AI_Fail_EA_Die_Corner', 'AI_Fail_EA_Die_Surface', 'AI_Fail_Image_Die_Corner', 'AI_Fail_Image_Die_Surface', 'AI_Fail_Total', 'Total_AOI_Die_Corner_Image', 'AI_Pass', 'AI_Reduction_Die_Corner', 'AI_Reduction_All', 'True_Fail', 'True_Fail_Crack', 'True_Fail_Chipout', 'True_Fail_Die_Surface', 'True_Fail_Others', 'EA_True_Fail_Crack', 'EA_True_Fail_Chipout', 'EA_True_Fail_Die_Surface', 'EA_True_Fail_Others', 'EA_True_Fail_Crack_Chipout', 'Device_ID', 'OP_EA_Blur', 'OP_EA_Bond_Pad', 'OP_EA_ChipOut', 'OP_EA_Crack', 'OP_EA_Edge_Die', 'OP_EA_Exessive_Probe_Mark','OP_EA_Film_Burr','OP_EA_Glass_Probe', 'OP_EA_Metal_Scratch', 'OP_EA_Op_Ink', 'OP_EA_Pad_Damage', 'OP_EA_Pad_Halo','OP_EA_Pad_Particle', 'OP_EA_Passivation_Effect', 'OP_EA_Pitting_Pad', 'OP_EA_Probing_Short','OP_EA_Residue', 'OP_EA_Scratch', 'OP_EA_Surface_Damage', 'OP_EA_Wrong_Size', 'OP_EA_Others', 'Die_Overkill']
 
     for i, title in enumerate(column_titles, start=1):
         cell = ws1.cell(row=1, column=i, value=title)
@@ -177,12 +177,14 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
 
                         EA_Fail_die = len(die_duplicate_Checker)
                         EA_Fail_corner = len(corner_duplicate_Checker)
+                        OP_Blur = {}
                         OP_Bond_Pad = {}
                         OP_ChipOut={}
                         OP_Crack = {}
                         OP_Edge_Die = {}
                         OP_Exessive_Probe_Mark = {}
                         OP_Film_Burr = {}
+                        OP_Glass_Probe = {}
                         OP_Metal_Scratch={}
                         OP_Op_Ink = {}
                         OP_Pad_Damage = {}
@@ -190,10 +192,11 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                         OP_Pad_Particle = {}
                         OP_Passivation_Effect = {}
                         OP_Pitting_Pad = {}
-                        OP_Probing_short = {}
+                        OP_Probing_Short = {}
                         OP_Residue = {}
                         OP_Scratch = {}
                         OP_Surface_Damage = {}
+                        OP_Wrong_Size = {}
                         OP_Others={}
 
                         for file_data in data["OP_FailDetails"]:
@@ -204,7 +207,12 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                     del die_duplicate_Checker[XY]
                                 if XY in corner_duplicate_Checker:
                                     del corner_duplicate_Checker[XY]
-                                if file_data["aoiDefectType"]=="Bond_Pad":
+                                if file_data["aoiDefectType"]=="Blur":
+                                    if(XY in OP_Blur):
+                                        OP_Blur[XY] +=1
+                                    else:
+                                        OP_Blur[XY] = 1
+                                elif file_data["aoiDefectType"]=="Bond_Pad":
                                     if(XY in OP_Bond_Pad):
                                         OP_Bond_Pad[XY] +=1
                                     else:
@@ -229,11 +237,16 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                         OP_Exessive_Probe_Mark[XY] +=1
                                     else:
                                         OP_Exessive_Probe_Mark[XY] = 1
-                                elif file_data["aoiDefectType"]=="Film_Burr":
+                                elif file_data["aoiDefectType"] in ("Film_Burr", "Defect Film Burr"):
                                     if(XY in OP_Film_Burr):
                                         OP_Film_Burr[XY] +=1
                                     else:
                                         OP_Film_Burr[XY] = 1
+                                elif file_data["aoiDefectType"]=="Glass_Probe":
+                                    if(XY in OP_Glass_Probe):
+                                        OP_Glass_Probe[XY] +=1
+                                    else:
+                                        OP_Glass_Probe[XY] = 1
                                 elif file_data["aoiDefectType"]=="Metal Scratch":
                                     if(XY in OP_Metal_Scratch):
                                         OP_Metal_Scratch[XY] +=1
@@ -270,10 +283,10 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                     else:
                                         OP_Pitting_Pad[XY] = 1
                                 elif file_data["aoiDefectType"]=="Probing_short":
-                                    if(XY in OP_Probing_short):
-                                        OP_Probing_short[XY] +=1
+                                    if(XY in OP_Probing_Short):
+                                        OP_Probing_Short[XY] +=1
                                     else:
-                                        OP_Probing_short[XY] = 1
+                                        OP_Probing_Short[XY] = 1
                                 elif file_data["aoiDefectType"]=="Residue":
                                     if(XY in OP_Residue):
                                         OP_Residue[XY] +=1
@@ -289,6 +302,11 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                                         OP_Surface_Damage[XY] +=1
                                     else:
                                         OP_Surface_Damage[XY] = 1
+                                elif file_data["aoiDefectType"]=="Wrong size":
+                                    if(XY in OP_Wrong_Size):
+                                        OP_Wrong_Size[XY] +=1
+                                    else:
+                                        OP_Wrong_Size[XY] = 1
                                 else:
                                     if(XY in OP_Others):
                                         OP_Others[XY] +=1
@@ -475,23 +493,26 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                             "EA_True_Fail_Others": EA_OP_Others,
                             "EA_True_Fail_Crack_Chipout" : EA_OP_Crack+EA_OP_Chipout,
                             "Device_ID" : data_device_ID,
+                            "OP_EA_Blur": len(OP_Blur),
                             "OP_EA_Bond_Pad": len(OP_Bond_Pad),
-                            "OP_EA_Die_Corner" : len(OP_ChipOut),
+                            "OP_EA_ChipOut" : len(OP_ChipOut),
                             "OP_EA_Crack" : len(OP_Crack),
                             "OP_EA_Edge_Die" : len(OP_Edge_Die),
                             "OP_EA_Exessive_Probe_Mark" : len(OP_Exessive_Probe_Mark),
                             "OP_EA_Film_Burr" : len(OP_Film_Burr),
-                            "OP_EA_Die_Surface" : len(OP_Metal_Scratch),
+                            "OP_EA_Glass_Probe" : len(OP_Glass_Probe),
+                            "OP_EA_Metal_Scratch" : len(OP_Metal_Scratch),
                             "OP_EA_Op_Ink" : len(OP_Op_Ink),
                             "OP_EA_Pad_Damage" : len(OP_Pad_Damage),
                             "OP_EA_Pad_Halo" : len(OP_Pad_Halo),
                             "OP_EA_Pad_Particle" : len(OP_Pad_Particle),
                             "OP_EA_Passivation_Effect" : len(OP_Passivation_Effect),
                             "OP_EA_Pitting_Pad" : len(OP_Pitting_Pad),
-                            "OP_EA_Probing_Short" : len(OP_Probing_short),
+                            "OP_EA_Probing_Short" : len(OP_Probing_Short),
                             "OP_EA_Residue" : len(OP_Residue),
                             "OP_EA_Scratch" : len(OP_Scratch),
                             "OP_EA_Surface_Damage" : len(OP_Surface_Damage),
+                            "OP_EA_Wrong_Size" : len(OP_Wrong_Size),
                             "OP_EA_Others": len(OP_Others),
                             "Die_Overkill": EA_Fail_corner + EA_Fail_die - data["Reject_Amount"]
                         }
@@ -605,25 +626,28 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                     'AR': 'EA_True_Fail_Others',
                     'AS': 'EA_True_Fail_Crack_Chipout',
                     'AT': 'Device_ID',
-                    'AU': 'OP_EA_Bond_Pad',
-                    'AV': 'OP_EA_Die_Corner',
-                    'AW': 'OP_EA_Crack',
-                    'AX': 'OP_EA_Edge_Die',
-                    'AY': 'OP_EA_Exessive_Probe_Mark',
-                    'AZ': 'OP_EA_Film_Burr',
-                    'BA': 'OP_EA_Die_Surface',
-                    'BB': 'OP_EA_Op_Ink',
-                    'BC': 'OP_EA_Pad_Damage',
-                    'BD': 'OP_EA_Pad_Halo',
-                    'BE': 'OP_EA_Pad_Particle',
-                    'BF': 'OP_EA_Passivation_Effect',
-                    'BG': 'OP_EA_Pitting_Pad',
-                    'BH': 'OP_EA_Probing_Short',
-                    'BI': 'OP_EA_Residue',
-                    'BJ': 'OP_EA_Scratch',
-                    'BK': 'OP_EA_Surface_Damage',
-                    'BL': 'OP_EA_Others',
-                    'BM': 'Die_Overkill'
+                    'AU': 'OP_EA_Blur',
+                    'AV': 'OP_EA_Bond_Pad',
+                    'AW': 'OP_EA_ChipOut',
+                    'AX': 'OP_EA_Crack',
+                    'AY': 'OP_EA_Edge_Die',
+                    'AZ': 'OP_EA_Exessive_Probe_Mark',
+                    'BA': 'OP_EA_Film_Burr',
+                    'BB': 'OP_EA_Glass_Probe',
+                    'BC': 'OP_EA_Metal_Scratch',
+                    'BD': 'OP_EA_Op_Ink',
+                    'BE': 'OP_EA_Pad_Damage',
+                    'BF': 'OP_EA_Pad_Halo',
+                    'BG': 'OP_EA_Pad_Particle',
+                    'BH': 'OP_EA_Passivation_Effect',
+                    'BI': 'OP_EA_Pitting_Pad',
+                    'BJ': 'OP_EA_Probing_Short',
+                    'BK': 'OP_EA_Residue',
+                    'BL': 'OP_EA_Scratch',
+                    'BM': 'OP_EA_Surface_Damage',
+                    'BN': 'OP_EA_Wrong_Size',
+                    'BO': 'OP_EA_Others',
+                    'BP': 'Die_Overkill'
                 }
                 for column, key in data_mapping.items():
                     ws1[column + str(excel_row)] = list[key]
@@ -674,7 +698,7 @@ def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name
     mycursor = mydb.cursor()
 
     # 建立 INSERT 語法
-    sql = "INSERT INTO {} (Date, Date_1, Lot, AOI_ID, AOI_Scan_Amount, AOI_Pass_Amount, AOI_Reject_Amount, AOI_Yield, AOI_Yield_Die_Corner, AI_Pass_Amount, AI_Reject_Amount, AI_Yield, AI_Fail_Corner_Yield, Final_Pass_Amount, Final_Reject_Amount, Final_Yield, AI_EA_Overkill_Die_Corner, AI_EA_Overkill_Die_Surface, AI_Image_Overkill_Die_Corner, AI_Image_Overkill_Die_Surface, EA_over_kill_Die_Corner, EA_over_kill_Die_Surface, Image_Overkill_Die_Corner, Image_Overkill_Die_Surface, Total_Images, Image_Overkill, AI_Fail_EA_Die_Corner, AI_Fail_EA_Die_Surface, AI_Fail_Image_Die_Corner, AI_Fail_Image_Die_Surface, AI_Fail_Total, Total_AOI_Die_Corner_Image, AI_Pass, AI_Reduction_Die_Corner, AI_Reduction_All, True_Fail, True_Fail_Crack, True_Fail_Chipout, True_Fail_Die_Surface, True_Fail_Others, EA_True_Fail_Crack, EA_True_Fail_Chipout, EA_True_Fail_Die_Surface, EA_True_Fail_Others, `EA_True_Fail_Crack_Chipout`, Device_ID, OP_EA_Bond_Pad, OP_EA_Die_Corner, OP_EA_Crack, OP_EA_Edge_Die, OP_EA_Exessive_Probe_Mark, OP_EA_Film_Burr, OP_EA_Die_Surface, OP_EA_Op_Ink, OP_EA_Pad_Damage, OP_EA_Pad_Halo, OP_EA_Pad_Particle, OP_EA_Passivation_Effect, OP_EA_Pitting_Pad, OP_EA_Probing_Short, OP_EA_Residue, OP_EA_Scratch, OP_EA_Surface_Damage, OP_EA_Others, Die_Overkill) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table_name)
+    sql = "INSERT INTO {} (Date, Date_1, Lot, AOI_ID, AOI_Scan_Amount, AOI_Pass_Amount, AOI_Reject_Amount, AOI_Yield, AOI_Yield_Die_Corner, AI_Pass_Amount, AI_Reject_Amount, AI_Yield, AI_Fail_Corner_Yield, Final_Pass_Amount, Final_Reject_Amount, Final_Yield, AI_EA_Overkill_Die_Corner, AI_EA_Overkill_Die_Surface, AI_Image_Overkill_Die_Corner, AI_Image_Overkill_Die_Surface, EA_over_kill_Die_Corner, EA_over_kill_Die_Surface, Image_Overkill_Die_Corner, Image_Overkill_Die_Surface, Total_Images, Image_Overkill, AI_Fail_EA_Die_Corner, AI_Fail_EA_Die_Surface, AI_Fail_Image_Die_Corner, AI_Fail_Image_Die_Surface, AI_Fail_Total, Total_AOI_Die_Corner_Image, AI_Pass, AI_Reduction_Die_Corner, AI_Reduction_All, True_Fail, True_Fail_Crack, True_Fail_Chipout, True_Fail_Die_Surface, True_Fail_Others, EA_True_Fail_Crack, EA_True_Fail_Chipout, EA_True_Fail_Die_Surface, EA_True_Fail_Others, `EA_True_Fail_Crack_Chipout`, Device_ID, OP_EA_Blur, OP_EA_Bond_Pad, OP_EA_ChipOut, OP_EA_Crack, OP_EA_Edge_Die, OP_EA_Exessive_Probe_Mark, OP_EA_Film_Burr, OP_EA_Glass_Probe, OP_EA_Metal_Scratch, OP_EA_Op_Ink, OP_EA_Pad_Damage, OP_EA_Pad_Halo, OP_EA_Pad_Particle, OP_EA_Passivation_Effect, OP_EA_Pitting_Pad, OP_EA_Probing_Short, OP_EA_Residue, OP_EA_Scratch, OP_EA_Surface_Damage, OP_EA_Wrong_Size, OP_EA_Others, Die_Overkill) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table_name)
 
     # 初始化總插入筆數
     total_rows_inserted = 0
@@ -862,8 +886,8 @@ JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strft
 CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # 寫入過去資料 start_day ~ end_day
-# start_day = "0615"
-# end_day = "0616"
+# start_day = "0808"
+# end_day = "0808"
 # for date in range(int(start_day), int(end_day) + 1):
 #     start_date = str(date).zfill(4)
 #     end_date = str(date + 1).zfill(4)
