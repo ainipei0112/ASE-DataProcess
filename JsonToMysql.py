@@ -34,7 +34,7 @@ def reset_ws():
     ws1.title = '工作表1'
 
     # 標題欄位
-    column_titles = ['Date', 'Date_1', 'Lot', 'AOI_ID', 'AOI_Scan_Amount', 'AOI_Pass_Amount', 'AOI_Reject_Amount', 'AOI_Yield', 'AOI_Yield_Die_Corner', 'AI_Pass_Amount', 'AI_Reject_Amount', 'AI_Yield', 'AI_Fail_Corner_Yield', 'Final_Pass_Amount', 'Final_Reject_Amount', 'Final_Yield', 'AI_EA_Overkill_Die_Corner', 'AI_EA_Overkill_Die_Surface', 'AI_Image_Overkill_Die_Corner', 'AI_Image_Overkill_Die_Surface', 'EA_over_kill_Die_Corner', 'EA_over_kill_Die_Surface', 'Image_Overkill_Die_Corner', 'Image_Overkill_Die_Surface', 'Total_Images', 'Image_Overkill', 'AI_Fail_EA_Die_Corner', 'AI_Fail_EA_Die_Surface', 'AI_Fail_Image_Die_Corner', 'AI_Fail_Image_Die_Surface', 'AI_Fail_Total', 'Total_AOI_Die_Corner_Image', 'AI_Pass', 'AI_Reduction_Die_Corner', 'AI_Reduction_All', 'True_Fail', 'True_Fail_Crack', 'True_Fail_Chipout', 'True_Fail_Die_Surface', 'True_Fail_Others', 'EA_True_Fail_Crack', 'EA_True_Fail_Chipout', 'EA_True_Fail_Die_Surface', 'EA_True_Fail_Others', 'EA_True_Fail_Crack_Chipout', 'Device_ID', 'OP_EA_Blur', 'OP_EA_Pad_Discolor', 'OP_EA_ChipOut', 'OP_EA_Crack', 'OP_EA_SD_Abnormal', 'OP_EA_Exessive_Probe_Mark','OP_EA_Film_Burr','OP_EA_Bosch_Special_Feature', 'OP_EA_Missing_Expansion', 'OP_EA_Op_Ink', 'OP_EA_Pad_Damage', 'OP_EA_Pad_Halo','OP_EA_Pad_Particle', 'OP_EA_Passivation_Effect', 'OP_EA_Pitting_Pad', 'OP_EA_Probing_Short','OP_EA_Residue', 'OP_EA_Scratch', 'OP_EA_Surface_Damage', 'OP_EA_Wrong_Size', 'OP_EA_Others', 'Die_Overkill']
+    column_titles = ['Date', 'Date_1', 'Lot', 'AOI_ID', 'AOI_Scan_Amount', 'AOI_Pass_Amount', 'AOI_Reject_Amount', 'AOI_Yield', 'AOI_Yield_Die_Corner', 'AI_Pass_Amount', 'AI_Reject_Amount', 'AI_Yield', 'AI_Fail_Corner_Yield', 'Final_Pass_Amount', 'Final_Reject_Amount', 'Final_Yield', 'AI_EA_Overkill_Die_Corner', 'AI_EA_Overkill_Die_Surface', 'AI_Image_Overkill_Die_Corner', 'AI_Image_Overkill_Die_Surface', 'EA_over_kill_Die_Corner', 'EA_over_kill_Die_Surface', 'Image_Overkill_Die_Corner', 'Image_Overkill_Die_Surface', 'Total_Images', 'Image_Overkill', 'AI_Fail_EA_Die_Corner', 'AI_Fail_EA_Die_Surface', 'AI_Fail_Image_Die_Corner', 'AI_Fail_Image_Die_Surface', 'AI_Fail_Total', 'Total_AOI_Die_Corner_Image', 'AI_Pass', 'AI_Reduction_Die_Corner', 'AI_Reduction_All', 'True_Fail', 'True_Fail_Crack', 'True_Fail_Chipout', 'True_Fail_Die_Surface', 'True_Fail_Others', 'EA_True_Fail_Crack', 'EA_True_Fail_Chipout', 'EA_True_Fail_Die_Surface', 'EA_True_Fail_Others', 'EA_True_Fail_Crack_Chipout', 'Device_ID', 'OP_EA_Blur', 'OP_EA_Pad_Discolor', 'OP_EA_ChipOut', 'OP_EA_Crack', 'OP_EA_SD_Abnormal', 'OP_EA_Exessive_Probe_Mark','OP_EA_Film_Burr','OP_EA_Bosch_Special_Feature', 'OP_EA_Missing_Expansion', 'OP_EA_Op_Ink', 'OP_EA_Pad_Damage', 'OP_EA_Pad_Halo','OP_EA_Pad_Particle', 'OP_EA_Passivation_Effect', 'OP_EA_Pitting_Pad', 'OP_EA_Probing_Short','OP_EA_Residue', 'OP_EA_Scratch', 'OP_EA_Surface_Damage', 'OP_EA_Wrong_Size', 'OP_EA_Others', 'Die_Overkill', 'Machine_ID']
 
     for i, title in enumerate(column_titles, start=1):
         cell = ws1.cell(row=1, column=i, value=title)
@@ -328,6 +328,13 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                         else:
                             print('OK',OG_Loc)
 
+                        klafile = OG_Loc+'\\'+OG_loc[7]+'.'+OG_loc[8].replace('.json','.kla')
+                        machine = ""
+                        if os.path.exists(klafile):
+                            f = open(klafile)
+                            str1 = f.readlines()
+                            f.close()
+                            machine = str1[3].split('"')[5]
                         for file_data in os.scandir(OG_Loc):
                             if(file_data.name.endswith("jpg")):
                                 XY = file_data.name.split("_")[5:9]
@@ -514,7 +521,8 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                             "OP_EA_Surface_Damage" : len(OP_Surface_Damage),
                             "OP_EA_Wrong_Size" : len(OP_Wrong_Size),
                             "OP_EA_Others": len(OP_Others),
-                            "Die_Overkill": EA_Fail_corner + EA_Fail_die - data["Reject_Amount"]
+                            "Die_Overkill": EA_Fail_corner + EA_Fail_die - data["Reject_Amount"],
+                            "Machine_ID": machine
                         }
                         list_data.append(data_dictionary)
 
@@ -647,7 +655,8 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                     'BM': 'OP_EA_Surface_Damage',
                     'BN': 'OP_EA_Wrong_Size',
                     'BO': 'OP_EA_Others',
-                    'BP': 'Die_Overkill'
+                    'BP': 'Die_Overkill',
+                    'BQ': 'Machine_ID'
                 }
                 for column, key in data_mapping.items():
                     ws1[column + str(excel_row)] = list[key]
@@ -668,8 +677,6 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
 # 將 CSV 資料寫入 MySQL 資料庫
 def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name):
     """
-    將 CSV 檔案匯入 MySQL 資料庫。
-
     Args:
         csv_folder (str): CSV 檔案所在資料夾路徑。
         target_folder (str): 目標資料夾路徑。
@@ -698,7 +705,7 @@ def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name
     mycursor = mydb.cursor()
 
     # 建立 INSERT 語法
-    sql = "INSERT INTO {} (Date, Date_1, Lot, AOI_ID, AOI_Scan_Amount, AOI_Pass_Amount, AOI_Reject_Amount, AOI_Yield, AOI_Yield_Die_Corner, AI_Pass_Amount, AI_Reject_Amount, AI_Yield, AI_Fail_Corner_Yield, Final_Pass_Amount, Final_Reject_Amount, Final_Yield, AI_EA_Overkill_Die_Corner, AI_EA_Overkill_Die_Surface, AI_Image_Overkill_Die_Corner, AI_Image_Overkill_Die_Surface, EA_over_kill_Die_Corner, EA_over_kill_Die_Surface, Image_Overkill_Die_Corner, Image_Overkill_Die_Surface, Total_Images, Image_Overkill, AI_Fail_EA_Die_Corner, AI_Fail_EA_Die_Surface, AI_Fail_Image_Die_Corner, AI_Fail_Image_Die_Surface, AI_Fail_Total, Total_AOI_Die_Corner_Image, AI_Pass, AI_Reduction_Die_Corner, AI_Reduction_All, True_Fail, True_Fail_Crack, True_Fail_Chipout, True_Fail_Die_Surface, True_Fail_Others, EA_True_Fail_Crack, EA_True_Fail_Chipout, EA_True_Fail_Die_Surface, EA_True_Fail_Others, `EA_True_Fail_Crack_Chipout`, Device_ID, OP_EA_Blur, OP_EA_Pad_Discolor, OP_EA_ChipOut, OP_EA_Crack, OP_EA_SD_Abnormal, OP_EA_Exessive_Probe_Mark, OP_EA_Film_Burr, OP_EA_Bosch_Special_Feature, OP_EA_Missing_Expansion, OP_EA_Op_Ink, OP_EA_Pad_Damage, OP_EA_Pad_Halo, OP_EA_Pad_Particle, OP_EA_Passivation_Effect, OP_EA_Pitting_Pad, OP_EA_Probing_Short, OP_EA_Residue, OP_EA_Scratch, OP_EA_Surface_Damage, OP_EA_Wrong_Size, OP_EA_Others, Die_Overkill) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table_name)
+    sql = "INSERT INTO {} (Date, Date_1, Lot, AOI_ID, AOI_Scan_Amount, AOI_Pass_Amount, AOI_Reject_Amount, AOI_Yield, AOI_Yield_Die_Corner, AI_Pass_Amount, AI_Reject_Amount, AI_Yield, AI_Fail_Corner_Yield, Final_Pass_Amount, Final_Reject_Amount, Final_Yield, AI_EA_Overkill_Die_Corner, AI_EA_Overkill_Die_Surface, AI_Image_Overkill_Die_Corner, AI_Image_Overkill_Die_Surface, EA_over_kill_Die_Corner, EA_over_kill_Die_Surface, Image_Overkill_Die_Corner, Image_Overkill_Die_Surface, Total_Images, Image_Overkill, AI_Fail_EA_Die_Corner, AI_Fail_EA_Die_Surface, AI_Fail_Image_Die_Corner, AI_Fail_Image_Die_Surface, AI_Fail_Total, Total_AOI_Die_Corner_Image, AI_Pass, AI_Reduction_Die_Corner, AI_Reduction_All, True_Fail, True_Fail_Crack, True_Fail_Chipout, True_Fail_Die_Surface, True_Fail_Others, EA_True_Fail_Crack, EA_True_Fail_Chipout, EA_True_Fail_Die_Surface, EA_True_Fail_Others, `EA_True_Fail_Crack_Chipout`, Device_ID, OP_EA_Blur, OP_EA_Pad_Discolor, OP_EA_ChipOut, OP_EA_Crack, OP_EA_SD_Abnormal, OP_EA_Exessive_Probe_Mark, OP_EA_Film_Burr, OP_EA_Bosch_Special_Feature, OP_EA_Missing_Expansion, OP_EA_Op_Ink, OP_EA_Pad_Damage, OP_EA_Pad_Halo, OP_EA_Pad_Particle, OP_EA_Passivation_Effect, OP_EA_Pitting_Pad, OP_EA_Probing_Short, OP_EA_Residue, OP_EA_Scratch, OP_EA_Surface_Damage, OP_EA_Wrong_Size, OP_EA_Others, Die_Overkill, Machine_ID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table_name)
 
     # 初始化總插入筆數
     total_rows_inserted = 0
@@ -754,7 +761,7 @@ def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name
 # 將 Excel Results 中的歷史 CSV 轉換為可入資料庫的型態
 def TransformHistoricalData(old_file_path, new_file_path):
     """
-    處理 CSV 檔案，更換欄位名稱並新增 Die_Overkill 欄位。
+    處理 CSV 檔案，更換欄位名稱。
 
     Args:
         old_file_path (str): 舊 CSV 檔案的路徑。
