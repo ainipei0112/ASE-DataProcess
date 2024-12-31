@@ -893,8 +893,8 @@ JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strft
 CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # 寫入過去資料 start_day ~ end_day
-# start_day = "0808"
-# end_day = "0808"
+# start_day = "1227"
+# end_day = "1227"
 # for date in range(int(start_day), int(end_day) + 1):
 #     start_date = str(date).zfill(4)
 #     end_date = str(date + 1).zfill(4)
@@ -902,6 +902,6 @@ CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, ta
 #     JsonToExcel(database, main_path, csv_folder, start_date, end_date, wb, ws1, output_type="csv")
 #     CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
-# 處理歷史 CSV 檔案
+# 處理歷史 CSV 檔案 - 已棄用
 # TransformHistoricalData(old_file_path, new_file_path)
 # CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
