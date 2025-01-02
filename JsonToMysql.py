@@ -92,6 +92,11 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
 
     # 將所有 Json 進行邏輯運算
     for directory in directories: # 所有日期的資料夾
+
+        # 跳過 AI_Result 中多餘資料夾
+        if directory in ["settings", "deletion_settings NF", "deletion_settings", "Alarm"]:
+            continue
+
         lot_names = [f.path for f in os.scandir(directory) if os.path.isdir(f.path)]
 
         for lot_name in lot_names: # 所有批號的資料夾
@@ -893,8 +898,8 @@ JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strft
 CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # 寫入過去資料 start_day ~ end_day
-# start_day = "1227"
-# end_day = "1227"
+# start_day = "1231"
+# end_day = "1231"
 # for date in range(int(start_day), int(end_day) + 1):
 #     start_date = str(date).zfill(4)
 #     end_date = str(date + 1).zfill(4)
