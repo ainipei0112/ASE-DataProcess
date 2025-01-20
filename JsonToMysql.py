@@ -4,11 +4,13 @@ import csv
 import json
 import time
 import shutil
+import socket
 import smtplib
 import chardet
 import datetime
 import numpy as np
 import pandas as pd
+import datetime as dt
 import mysql.connector
 from openpyxl import Workbook
 from email.mime.text import MIMEText
@@ -22,12 +24,15 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill, numbers
 def read_Jsonfile(settings_path):
     try:
         print("Reading database.")
+        WriteLog("read_Jsonfile", "start")
         with open(settings_path, "r", encoding='utf-8') as r_file:
             databases = json.load(r_file)
         database = databases["folder_details"]
+        WriteLog("read_Jsonfile", "success")
         return database
-    except Exception as e:
-        print(f"Failed to read database: {e}")
+    except Exception as error:
+        print(f"Failed to read database: {error}")
+        WriteLog("read_Jsonfile", f"failed: {error}")
         exit()
 
 #設定Excel標題格式
@@ -335,6 +340,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                         # 輸出成功顯示OK
                         if not os.path.exists(OG_Loc):
                             print('DIE',OG_Loc)
+                            WriteLog("JsonToExcel", f"DIE: {OG_Loc}")
                             break
                         else:
                             print('OK',OG_Loc)
@@ -554,6 +560,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
 
     if list_data2:
         print("Creating csv")
+        WriteLog("JsonToExcel", "Creating csv")
         keys = list_data2[0].keys()
         directory_name = directory.split('\\')[-1]
         directory_name = directory_name.split("-")[1:]
@@ -681,6 +688,7 @@ def JsonToExcel(database, main_path, output_path, yesterday, today, wb, ws1, wee
                     break
                 except Exception as error:
                     print(error)
+                    WriteLog("JsonToExcel", f"failed: {error}")
                     time.sleep(1)
 
     print(directories)
@@ -709,8 +717,10 @@ def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name
     # 驗證連線
     if mydb.is_connected():
         print("Database connection successful")
+        WriteLog("Database connection", "successful")
     else:
         print("Database connection failed")
+        WriteLog("Database connection", "failed")
         MailAlert()
         return
 
@@ -745,6 +755,7 @@ def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name
                 rows_inserted = mycursor.rowcount
                 total_rows_inserted += rows_inserted
                 print(f"File: {filename} IN {rows_inserted}!")
+                WriteLog(f"File: {filename}", f"IN {rows_inserted} rows")
 
                 # 取得檔案月份
                 month = filename[:2]
@@ -763,10 +774,12 @@ def CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name
                 shutil.move(csv_file, month_folder)
             except mysql.connector.Error as error:
                 print(f"File: {filename} ERROR: {error}")
+                WriteLog(f"File: {filename}", f"ERROR: {error}")
                 MailAlert() # 發送錯誤通知郵件
 
     # 輸出總共插入的資料筆數
     print(f"\nTotal rows inserted: {total_rows_inserted}")
+    WriteLog("Total rows inserted", total_rows_inserted)
 
     # 關閉 Cursor 和連線
     mycursor.close()
@@ -798,6 +811,28 @@ def MailAlert():
         print("郵件已成功發送")
     except Exception as e:
         print(f"發送郵件失敗: {e}")
+
+def WriteLog(action, status):
+    LOG_FILE_PATH = '//10.11.33.122/D$/khwbpeaiaoi_Shares$/K18330/Log/DB/'
+    if not os.path.exists(LOG_FILE_PATH):
+        os.makedirs(LOG_FILE_PATH)
+
+    current_date = dt.datetime.now().strftime('%Y-%m-%d')
+    current_time = dt.datetime.now().strftime('%H:%M:%S')
+    log_file = os.path.join(LOG_FILE_PATH, f'{current_date}.txt')
+
+    # 獲取本地IP地址
+    try:
+        host_name = socket.gethostname()
+        local_ip = socket.gethostbyname(host_name)
+    except Exception as e:
+        local_ip = f"Unknown: {e}"
+
+    user_ip = f"[IP:{local_ip}->"
+    log_message = f"{current_time}] {action} - {status} \n"
+
+    with open(log_file, 'a') as file:
+        file.write(user_ip + log_message)
 
 # ----------------------------------- 參數設定 -----------------------------------
 
@@ -845,8 +880,8 @@ JsonToExcel(database, main_path, csv_folder,(now + datetime.timedelta(-1)).strft
 CsvToMysql(csv_folder, target_folder, db_host, db_user, db_password, db_name, table_name)
 
 # 寫入過去資料 start_day ~ end_day
-# start_day = "1231"
-# end_day = "1231"
+# start_day = "0118"
+# end_day = "0119"
 # for date in range(int(start_day), int(end_day) + 1):
 #     start_date = str(date).zfill(4)
 #     end_date = str(date + 1).zfill(4)
